@@ -1,10 +1,10 @@
 #pragma once
 
-#include "WyrmCore.h"
+#include "ChevalierCore.h"
 
 struct GLFWwindow;
 
-class WyrmEngineStatics
+class ChevalierEngineStatics
 {
 public:
 

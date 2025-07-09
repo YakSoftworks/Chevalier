@@ -1,33 +1,33 @@
-#include "WyrmRenderer.h"
-#include "WyrmEngineStatics.h"
-#include "WyrmRenderObject.h"
+#include "ChevalierRenderer.h"
+#include "ChevalierEngineStatics.h"
+#include "ChevalierRenderObject.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 #include "GLFW/glfw3.h"
 
-WyrmRenderer* WyrmRenderer::mInstance = nullptr;
+ChevalierRenderer* ChevalierRenderer::mInstance = nullptr;
 
-WyrmRenderer::WyrmRenderer()
+ChevalierRenderer::ChevalierRenderer()
 {
 	//Set Singleton Value
     mInstance = this;
 }
 
-void WyrmRenderer::SetFrameBufferResized(bool value)
+void ChevalierRenderer::SetFrameBufferResized(bool value)
 {
 }
 
-void WyrmRenderer::RegisterRenderObject(WyrmRenderObject* newObject)
+void ChevalierRenderer::RegisterRenderObject(ChevalierRenderObject* newObject)
 {
     getInstance()->renderObjects.push_back(newObject);
     newObject->OnRegisteredToRenderer();
 }
 
-void WyrmRenderer::UnregisterRenderObject(WyrmRenderObject* object)
+void ChevalierRenderer::UnregisterRenderObject(ChevalierRenderObject* object)
 {
-    WyrmRenderer* instance = getInstance();
+    ChevalierRenderer* instance = getInstance();
     for (size_t i = 0; i < instance->renderObjects.size(); i++) {
         if (instance->renderObjects.at(i) == object) {
             instance->renderObjects.erase(instance->renderObjects.begin() + i);
@@ -38,7 +38,7 @@ void WyrmRenderer::UnregisterRenderObject(WyrmRenderObject* object)
     object->OnUnregisteredToRenderer();
 }
 
-void WyrmRenderer::initRenderer()
+void ChevalierRenderer::initRenderer()
 {
 
 	//Swap Chain
@@ -81,16 +81,16 @@ void WyrmRenderer::initRenderer()
     createSyncObjects();
 
     //Create the Render Objects
-    WyrmRenderObject* RO = new WyrmRenderObject();
+    ChevalierRenderObject* RO = new ChevalierRenderObject();
     RegisterRenderObject(RO);
 
     //Create the Render Objects
-    WyrmRenderObject* RO2 = new WyrmRenderObject();
+    ChevalierRenderObject* RO2 = new ChevalierRenderObject();
     RegisterRenderObject(RO2);
 
 
 }
-void WyrmRenderer::createImageViews() {
+void ChevalierRenderer::createImageViews() {
     vSwapChainImageViews.resize(vSwapChainImages.size());
 
     for (size_t i = 0; i < vSwapChainImages.size(); i++) {
@@ -99,7 +99,7 @@ void WyrmRenderer::createImageViews() {
 }
 
 
-void WyrmRenderer::createDescriptorSetLayout() {
+void ChevalierRenderer::createDescriptorSetLayout() {
     VkDescriptorSetLayoutBinding uboLayoutBinding{};
     uboLayoutBinding.binding = 0;
     uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -120,30 +120,30 @@ void WyrmRenderer::createDescriptorSetLayout() {
     layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
     layoutInfo.pBindings = bindings.data();
 
-    if (vkCreateDescriptorSetLayout(WyrmEngineStatics::getLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
+    if (vkCreateDescriptorSetLayout(ChevalierEngineStatics::getLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor set layout!");
     }
 
 
 }
 
-VkShaderModule WyrmRenderer::createShaderModule(const std::vector<char>& code) {
+VkShaderModule ChevalierRenderer::createShaderModule(const std::vector<char>& code) {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    if (vkCreateShaderModule(WyrmEngineStatics::getLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+    if (vkCreateShaderModule(ChevalierEngineStatics::getLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
         throw std::runtime_error("failed to create shader module!");
     }
 
     return shaderModule;
 }
 
-void WyrmRenderer::createGraphicsPipeline() {
-    auto vertShaderCode = WyrmEngineStatics::readFile("content/shaders/vert.spv");
-    auto fragShaderCode = WyrmEngineStatics::readFile("content/shaders/frag.spv");
+void ChevalierRenderer::createGraphicsPipeline() {
+    auto vertShaderCode = ChevalierEngineStatics::readFile("content/shaders/vert.spv");
+    auto fragShaderCode = ChevalierEngineStatics::readFile("content/shaders/frag.spv");
 
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -197,7 +197,7 @@ void WyrmRenderer::createGraphicsPipeline() {
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling.sampleShadingEnable = VK_TRUE;
     multisampling.minSampleShading = .2f;
-    multisampling.rasterizationSamples = WyrmEngineStatics::getSamplesCount();
+    multisampling.rasterizationSamples = ChevalierEngineStatics::getSamplesCount();
 
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
     colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -237,7 +237,7 @@ void WyrmRenderer::createGraphicsPipeline() {
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
     pipelineLayoutInfo.pushConstantRangeCount = 0;
 
-    if (vkCreatePipelineLayout(WyrmEngineStatics::getLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+    if (vkCreatePipelineLayout(ChevalierEngineStatics::getLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
     }
 
@@ -258,16 +258,16 @@ void WyrmRenderer::createGraphicsPipeline() {
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-    if (vkCreateGraphicsPipelines(WyrmEngineStatics::getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+    if (vkCreateGraphicsPipelines(ChevalierEngineStatics::getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 
-    vkDestroyShaderModule(WyrmEngineStatics::getLogicalDevice(), fragShaderModule, nullptr);
-    vkDestroyShaderModule(WyrmEngineStatics::getLogicalDevice(), vertShaderModule, nullptr);
+    vkDestroyShaderModule(ChevalierEngineStatics::getLogicalDevice(), fragShaderModule, nullptr);
+    vkDestroyShaderModule(ChevalierEngineStatics::getLogicalDevice(), vertShaderModule, nullptr);
 }
 
-void WyrmRenderer::createSwapChain() {
-    SwapChainSupportDetails swapChainSupport = WyrmEngineStatics::querySwapChainSupport(WyrmEngineStatics::getPhysicalDevice());
+void ChevalierRenderer::createSwapChain() {
+    SwapChainSupportDetails swapChainSupport = ChevalierEngineStatics::querySwapChainSupport(ChevalierEngineStatics::getPhysicalDevice());
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -280,7 +280,7 @@ void WyrmRenderer::createSwapChain() {
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = WyrmEngineStatics::getSurface();
+    createInfo.surface = ChevalierEngineStatics::getSurface();
 
     createInfo.minImageCount = imageCount;
     createInfo.imageFormat = surfaceFormat.format;
@@ -289,7 +289,7 @@ void WyrmRenderer::createSwapChain() {
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    QueueFamilyIndices indices = WyrmEngineStatics::findQueueFamilies(WyrmEngineStatics::getPhysicalDevice());
+    QueueFamilyIndices indices = ChevalierEngineStatics::findQueueFamilies(ChevalierEngineStatics::getPhysicalDevice());
     uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
     if (indices.graphicsFamily != indices.presentFamily) {
@@ -306,22 +306,22 @@ void WyrmRenderer::createSwapChain() {
     createInfo.presentMode = presentMode;
     createInfo.clipped = VK_TRUE;
 
-    if (vkCreateSwapchainKHR(WyrmEngineStatics::getLogicalDevice(), &createInfo, nullptr, &vSwapChain) != VK_SUCCESS) {
+    if (vkCreateSwapchainKHR(ChevalierEngineStatics::getLogicalDevice(), &createInfo, nullptr, &vSwapChain) != VK_SUCCESS) {
         throw std::runtime_error("failed to create swap chain!");
     }
 
-    vkGetSwapchainImagesKHR(WyrmEngineStatics::getLogicalDevice(), vSwapChain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(ChevalierEngineStatics::getLogicalDevice(), vSwapChain, &imageCount, nullptr);
     vSwapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(WyrmEngineStatics::getLogicalDevice(), vSwapChain, &imageCount, vSwapChainImages.data());
+    vkGetSwapchainImagesKHR(ChevalierEngineStatics::getLogicalDevice(), vSwapChain, &imageCount, vSwapChainImages.data());
 
     vSwapChainImageFormat = surfaceFormat.format;
     vSwapChainExtent = extent;
 }
 
-void WyrmRenderer::createRenderPass() {
+void ChevalierRenderer::createRenderPass() {
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = vSwapChainImageFormat;
-    colorAttachment.samples = WyrmEngineStatics::getSamplesCount();
+    colorAttachment.samples = ChevalierEngineStatics::getSamplesCount();
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -357,7 +357,7 @@ void WyrmRenderer::createRenderPass() {
     depthAttachment.format = findDepthFormat();
     depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.samples = WyrmEngineStatics::getSamplesCount();
+    depthAttachment.samples = ChevalierEngineStatics::getSamplesCount();
     depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -399,13 +399,13 @@ void WyrmRenderer::createRenderPass() {
 
 
 
-    if (vkCreateRenderPass(WyrmEngineStatics::getLogicalDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+    if (vkCreateRenderPass(ChevalierEngineStatics::getLogicalDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
     }
 }
 
 
-void WyrmRenderer::createUniformBuffers() {
+void ChevalierRenderer::createUniformBuffers() {
 
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
@@ -416,19 +416,19 @@ void WyrmRenderer::createUniformBuffers() {
 
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        WyrmEngineStatics::createBuffer(bufferSize,
+        ChevalierEngineStatics::createBuffer(bufferSize,
             VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             uniformBuffers[i],
             unformBuffersMemory[i]);
 
-        vkMapMemory(WyrmEngineStatics::getLogicalDevice(), unformBuffersMemory[i], 0, bufferSize, 0, &uniformBuffersMapped[i]);
+        vkMapMemory(ChevalierEngineStatics::getLogicalDevice(), unformBuffersMemory[i], 0, bufferSize, 0, &uniformBuffersMapped[i]);
 
     }
 
 }
 
-void WyrmRenderer::createFramebuffers()
+void ChevalierRenderer::createFramebuffers()
 {
     vSwapChainFramebuffers.resize(vSwapChainImageViews.size());
 
@@ -454,27 +454,27 @@ void WyrmRenderer::createFramebuffers()
         framebufferInfo.height = vSwapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(WyrmEngineStatics::getLogicalDevice(), &framebufferInfo, nullptr, &vSwapChainFramebuffers[i]) != VK_SUCCESS) {
+        if (vkCreateFramebuffer(ChevalierEngineStatics::getLogicalDevice(), &framebufferInfo, nullptr, &vSwapChainFramebuffers[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
 }
 
-void WyrmRenderer::createCommandPool()
+void ChevalierRenderer::createCommandPool()
 {
-    QueueFamilyIndices queueFamilyIndices = WyrmEngineStatics::findQueueFamilies(WyrmEngineStatics::getPhysicalDevice());
+    QueueFamilyIndices queueFamilyIndices = ChevalierEngineStatics::findQueueFamilies(ChevalierEngineStatics::getPhysicalDevice());
 
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-    if (vkCreateCommandPool(WyrmEngineStatics::getLogicalDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
+    if (vkCreateCommandPool(ChevalierEngineStatics::getLogicalDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create command pool!");
     }
 }
 
-void WyrmRenderer::createDescriptorPool() {
+void ChevalierRenderer::createDescriptorPool() {
     std::array<VkDescriptorPoolSize, 2> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
@@ -489,13 +489,13 @@ void WyrmRenderer::createDescriptorPool() {
 
     poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
-    if (vkCreateDescriptorPool(WyrmEngineStatics::getLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
+    if (vkCreateDescriptorPool(ChevalierEngineStatics::getLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool!");
     }
 
 }
 
-void WyrmRenderer::createDescriptorSets() {
+void ChevalierRenderer::createDescriptorSets() {
 
     std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
@@ -505,7 +505,7 @@ void WyrmRenderer::createDescriptorSets() {
     allocInfo.pSetLayouts = layouts.data();
 
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-    if (vkAllocateDescriptorSets(WyrmEngineStatics::getLogicalDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
+    if (vkAllocateDescriptorSets(ChevalierEngineStatics::getLogicalDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate descriptor sets!");
     }
 
@@ -541,13 +541,13 @@ void WyrmRenderer::createDescriptorSets() {
         descriptorWrites[1].pImageInfo = &imageInfo;
 
 
-        vkUpdateDescriptorSets(WyrmEngineStatics::getLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(ChevalierEngineStatics::getLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 
     }
 
 }
 
-void WyrmRenderer::createCommandBuffers()
+void ChevalierRenderer::createCommandBuffers()
 {
 	commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -557,12 +557,12 @@ void WyrmRenderer::createCommandBuffers()
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
-	if (vkAllocateCommandBuffers(WyrmEngineStatics::getLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+	if (vkAllocateCommandBuffers(ChevalierEngineStatics::getLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
 		throw std::runtime_error("failed to allocate command buffers!");
 	}
 }
 
-void WyrmRenderer::createSyncObjects()
+void ChevalierRenderer::createSyncObjects()
 {
 	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 	renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -576,15 +576,15 @@ void WyrmRenderer::createSyncObjects()
 	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		if (vkCreateSemaphore(WyrmEngineStatics::getLogicalDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-			vkCreateSemaphore(WyrmEngineStatics::getLogicalDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-			vkCreateFence(WyrmEngineStatics::getLogicalDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+		if (vkCreateSemaphore(ChevalierEngineStatics::getLogicalDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+			vkCreateSemaphore(ChevalierEngineStatics::getLogicalDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+			vkCreateFence(ChevalierEngineStatics::getLogicalDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create synchronization objects for a frame!");
 		}
 	}
 }
 
-VkSurfaceFormatKHR WyrmRenderer::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+VkSurfaceFormatKHR ChevalierRenderer::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
     for (const auto& availableFormat : availableFormats) {
         if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
             return availableFormat;
@@ -594,7 +594,7 @@ VkSurfaceFormatKHR WyrmRenderer::chooseSwapSurfaceFormat(const std::vector<VkSur
     return availableFormats[0];
 }
 
-VkPresentModeKHR WyrmRenderer::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+VkPresentModeKHR ChevalierRenderer::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
     for (const auto& availablePresentMode : availablePresentModes) {
         if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
             return availablePresentMode;
@@ -604,13 +604,13 @@ VkPresentModeKHR WyrmRenderer::chooseSwapPresentMode(const std::vector<VkPresent
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D WyrmRenderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
+VkExtent2D ChevalierRenderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         return capabilities.currentExtent;
     }
     else {
         int width, height;
-        glfwGetFramebufferSize(WyrmEngineStatics::getWindow(), &width, &height);
+        glfwGetFramebufferSize(ChevalierEngineStatics::getWindow(), &width, &height);
 
         VkExtent2D actualExtent = {
             static_cast<uint32_t>(width),
@@ -624,7 +624,7 @@ VkExtent2D WyrmRenderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabi
     }
 }
 
-void WyrmRenderer::updateUniformBuffer(uint32_t currentImage) {
+void ChevalierRenderer::updateUniformBuffer(uint32_t currentImage) {
     static auto startTime = std::chrono::high_resolution_clock::now();
 
     auto currentTime = std::chrono::high_resolution_clock::now();
@@ -648,7 +648,7 @@ void WyrmRenderer::updateUniformBuffer(uint32_t currentImage) {
 
 }
 
-void WyrmRenderer::createTextureImage() {
+void ChevalierRenderer::createTextureImage() {
     int texWidth, texHeight, texChannels;
     //stbi_uc* pixels = stbi_load("textures/statueGuyjpg.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     stbi_uc* pixels = stbi_load("content/textures/viking_room.png", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -663,12 +663,12 @@ void WyrmRenderer::createTextureImage() {
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    WyrmEngineStatics::createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    ChevalierEngineStatics::createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
     void* data;
-    vkMapMemory(WyrmEngineStatics::getLogicalDevice(), stagingBufferMemory, 0, imageSize, 0, &data);
+    vkMapMemory(ChevalierEngineStatics::getLogicalDevice(), stagingBufferMemory, 0, imageSize, 0, &data);
     memcpy(data, pixels, static_cast<size_t>(imageSize));
-    vkUnmapMemory(WyrmEngineStatics::getLogicalDevice(), stagingBufferMemory);
+    vkUnmapMemory(ChevalierEngineStatics::getLogicalDevice(), stagingBufferMemory);
 
     stbi_image_free(pixels);
 
@@ -680,11 +680,11 @@ void WyrmRenderer::createTextureImage() {
 
     generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
 
-    vkDestroyBuffer(WyrmEngineStatics::getLogicalDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(WyrmEngineStatics::getLogicalDevice(), stagingBufferMemory, nullptr);
+    vkDestroyBuffer(ChevalierEngineStatics::getLogicalDevice(), stagingBuffer, nullptr);
+    vkFreeMemory(ChevalierEngineStatics::getLogicalDevice(), stagingBufferMemory, nullptr);
 }
 
-void WyrmRenderer::createImage(uint32_t width, uint32_t height, uint32_t mipLevel, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling,
+void ChevalierRenderer::createImage(uint32_t width, uint32_t height, uint32_t mipLevel, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling,
     VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
 {
     VkImageCreateInfo imageInfo{};
@@ -702,31 +702,31 @@ void WyrmRenderer::createImage(uint32_t width, uint32_t height, uint32_t mipLeve
     imageInfo.samples = numSamples;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateImage(WyrmEngineStatics::getLogicalDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS) {
+    if (vkCreateImage(ChevalierEngineStatics::getLogicalDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS) {
         throw std::runtime_error("failed to create image!");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(WyrmEngineStatics::getLogicalDevice(), image, &memRequirements);
+    vkGetImageMemoryRequirements(ChevalierEngineStatics::getLogicalDevice(), image, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = WyrmEngineStatics::findMemoryType(memRequirements.memoryTypeBits, properties);
+    allocInfo.memoryTypeIndex = ChevalierEngineStatics::findMemoryType(memRequirements.memoryTypeBits, properties);
 
-    if (vkAllocateMemory(WyrmEngineStatics::getLogicalDevice(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(ChevalierEngineStatics::getLogicalDevice(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate image memory!");
     }
 
-    vkBindImageMemory(WyrmEngineStatics::getLogicalDevice(), image, imageMemory, 0);
+    vkBindImageMemory(ChevalierEngineStatics::getLogicalDevice(), image, imageMemory, 0);
 }
 
 
 
 
 
-void WyrmRenderer::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t mipLevel) {
-    VkCommandBuffer commandBuffer = WyrmEngineStatics::beginSingleTimeCommands();
+void ChevalierRenderer::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t mipLevel) {
+    VkCommandBuffer commandBuffer = ChevalierEngineStatics::beginSingleTimeCommands();
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -786,11 +786,11 @@ void WyrmRenderer::transitionImageLayout(VkImage image, VkFormat format, VkImage
     );
 
 
-    WyrmEngineStatics::endSingleTimeCommands(commandBuffer);
+    ChevalierEngineStatics::endSingleTimeCommands(commandBuffer);
 }
 
-void WyrmRenderer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
-    VkCommandBuffer commandBuffer = WyrmEngineStatics::beginSingleTimeCommands();
+void ChevalierRenderer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
+    VkCommandBuffer commandBuffer = ChevalierEngineStatics::beginSingleTimeCommands();
 
     VkBufferImageCopy region{};
     region.bufferOffset = 0;
@@ -818,10 +818,10 @@ void WyrmRenderer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t wi
         &region
     );
 
-    WyrmEngineStatics::endSingleTimeCommands(commandBuffer);
+    ChevalierEngineStatics::endSingleTimeCommands(commandBuffer);
 }
 
-void WyrmRenderer::createTextureImageView() {
+void ChevalierRenderer::createTextureImageView() {
     textureImageView = createImageView(
         textureImage,
         VK_FORMAT_R8G8B8A8_SRGB,
@@ -830,7 +830,7 @@ void WyrmRenderer::createTextureImageView() {
     );
 }
 
-VkImageView WyrmRenderer::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevel) {
+VkImageView ChevalierRenderer::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevel) {
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = image;
@@ -843,14 +843,14 @@ VkImageView WyrmRenderer::createImageView(VkImage image, VkFormat format, VkImag
     viewInfo.subresourceRange.layerCount = 1;
 
     VkImageView imageView;
-    if (vkCreateImageView(WyrmEngineStatics::getLogicalDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
+    if (vkCreateImageView(ChevalierEngineStatics::getLogicalDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
         throw std::runtime_error("failed to create image view!");
     }
 
     return imageView;
 }
 
-void WyrmRenderer::createTextureSampler() {
+void ChevalierRenderer::createTextureSampler() {
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     samplerInfo.magFilter = VK_FILTER_LINEAR;
@@ -861,7 +861,7 @@ void WyrmRenderer::createTextureSampler() {
     samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 
     VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(WyrmEngineStatics::getPhysicalDevice(), &properties);
+    vkGetPhysicalDeviceProperties(ChevalierEngineStatics::getPhysicalDevice(), &properties);
 
 
     samplerInfo.anisotropyEnable = VK_TRUE;
@@ -877,12 +877,12 @@ void WyrmRenderer::createTextureSampler() {
     samplerInfo.minLod = 0.0f;
     samplerInfo.maxLod = VK_LOD_CLAMP_NONE;
 
-    if (vkCreateSampler(WyrmEngineStatics::getLogicalDevice(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
+    if (vkCreateSampler(ChevalierEngineStatics::getLogicalDevice(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture sampler!");
     }
 }
 
-void WyrmRenderer::createDepthResources() {
+void ChevalierRenderer::createDepthResources() {
     VkFormat depthFormat = findDepthFormat();
 
     //Create Depth Image
@@ -890,7 +890,7 @@ void WyrmRenderer::createDepthResources() {
         vSwapChainExtent.width,
         vSwapChainExtent.height,
         1,
-        WyrmEngineStatics::getSamplesCount(),
+        ChevalierEngineStatics::getSamplesCount(),
         depthFormat,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
@@ -909,10 +909,10 @@ void WyrmRenderer::createDepthResources() {
 
 }
 
-VkFormat WyrmRenderer::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
+VkFormat ChevalierRenderer::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
     for (const auto format : candidates) {
         VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(WyrmEngineStatics::getPhysicalDevice(), format, &props);
+        vkGetPhysicalDeviceFormatProperties(ChevalierEngineStatics::getPhysicalDevice(), format, &props);
 
         if (tiling == VkImageTiling::VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
             return format;
@@ -927,7 +927,7 @@ VkFormat WyrmRenderer::findSupportedFormat(const std::vector<VkFormat>& candidat
     throw std::runtime_error("failed to find supported format");
 }
 
-VkFormat WyrmRenderer::findDepthFormat() {
+VkFormat ChevalierRenderer::findDepthFormat() {
     return findSupportedFormat(
         { VkFormat::VK_FORMAT_D32_SFLOAT, VkFormat::VK_FORMAT_D32_SFLOAT_S8_UINT, VkFormat::VK_FORMAT_D24_UNORM_S8_UINT },
         VK_IMAGE_TILING_OPTIMAL,
@@ -935,24 +935,24 @@ VkFormat WyrmRenderer::findDepthFormat() {
     );
 }
 
-bool WyrmRenderer::hasStencilComponent(VkFormat format) {
+bool ChevalierRenderer::hasStencilComponent(VkFormat format) {
     return format == VkFormat::VK_FORMAT_D32_SFLOAT_S8_UINT || format == VkFormat::VK_FORMAT_D24_UNORM_S8_UINT;
 }
 
 
 
-void WyrmRenderer::generateMipmaps(VkImage image, VkFormat imageFormat, uint32_t texWidth, uint32_t texHeight, uint32_t mipLevels) {
+void ChevalierRenderer::generateMipmaps(VkImage image, VkFormat imageFormat, uint32_t texWidth, uint32_t texHeight, uint32_t mipLevels) {
 
 
     VkFormatProperties formatProperties;
-    vkGetPhysicalDeviceFormatProperties(WyrmEngineStatics::getPhysicalDevice(), imageFormat, &formatProperties);
+    vkGetPhysicalDeviceFormatProperties(ChevalierEngineStatics::getPhysicalDevice(), imageFormat, &formatProperties);
 
     if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
         throw std::runtime_error("texture image does not support linear blitting");
     }
 
 
-    VkCommandBuffer commandBuffer = WyrmEngineStatics::beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = ChevalierEngineStatics::beginSingleTimeCommands();
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -1050,17 +1050,17 @@ void WyrmRenderer::generateMipmaps(VkImage image, VkFormat imageFormat, uint32_t
         1, &barrier);
 
 
-    WyrmEngineStatics::endSingleTimeCommands(commandBuffer);
+    ChevalierEngineStatics::endSingleTimeCommands(commandBuffer);
 
 
 
 
 }
 
-VkSampleCountFlagBits WyrmRenderer::getMaxUsableSampleCount() {
+VkSampleCountFlagBits ChevalierRenderer::getMaxUsableSampleCount() {
 
     VkPhysicalDeviceProperties physicalDeviceProperties;
-    vkGetPhysicalDeviceProperties(WyrmEngineStatics::getPhysicalDevice(), &physicalDeviceProperties);
+    vkGetPhysicalDeviceProperties(ChevalierEngineStatics::getPhysicalDevice(), &physicalDeviceProperties);
 
     VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
 
@@ -1075,24 +1075,24 @@ VkSampleCountFlagBits WyrmRenderer::getMaxUsableSampleCount() {
     return VK_SAMPLE_COUNT_1_BIT;
 }
 
-void WyrmRenderer::createColorResources() {
+void ChevalierRenderer::createColorResources() {
     VkFormat colorFormat = vSwapChainImageFormat;
 
-    createImage(vSwapChainExtent.width, vSwapChainExtent.height, 1, WyrmEngineStatics::getSamplesCount(), colorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+    createImage(vSwapChainExtent.width, vSwapChainExtent.height, 1, ChevalierEngineStatics::getSamplesCount(), colorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage, colorImageMemory);
 
     colorImageView = createImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
 
-void WyrmRenderer::recreateSwapChain() {
+void ChevalierRenderer::recreateSwapChain() {
     int width = 0, height = 0;
-    glfwGetFramebufferSize(WyrmEngineStatics::getWindow(), &width, &height);
+    glfwGetFramebufferSize(ChevalierEngineStatics::getWindow(), &width, &height);
     while (width == 0 || height == 0) {
-        glfwGetFramebufferSize(WyrmEngineStatics::getWindow(), &width, &height);
+        glfwGetFramebufferSize(ChevalierEngineStatics::getWindow(), &width, &height);
         glfwWaitEvents();
     }
 
-    vkDeviceWaitIdle(WyrmEngineStatics::getLogicalDevice());
+    vkDeviceWaitIdle(ChevalierEngineStatics::getLogicalDevice());
 
     cleanupSwapChain();
     cleanupColorResources();
@@ -1107,7 +1107,7 @@ void WyrmRenderer::recreateSwapChain() {
     createFramebuffers();
 }
 
-void WyrmRenderer::cleanup()
+void ChevalierRenderer::cleanup()
 {
     cleanupSwapChain();
 
@@ -1115,7 +1115,7 @@ void WyrmRenderer::cleanup()
     cleanupDepthResources();
 
     //Other stuff
-    VkDevice device = WyrmEngineStatics::getLogicalDevice();
+    VkDevice device = ChevalierEngineStatics::getLogicalDevice();
 
     vkDestroySampler(device, textureSampler, nullptr);
     vkDestroyImageView(device, textureImageView, nullptr);
@@ -1129,7 +1129,7 @@ void WyrmRenderer::cleanup()
     }
 
     //TODO: WITH RENDER OBJECTS
-    for (WyrmRenderObject* renderObject : renderObjects) {
+    for (ChevalierRenderObject* renderObject : renderObjects) {
         delete renderObject;
     }
 
@@ -1153,9 +1153,9 @@ void WyrmRenderer::cleanup()
     vkDestroyCommandPool(device, commandPool, nullptr);
 }
 
-void WyrmRenderer::cleanupSwapChain()
+void ChevalierRenderer::cleanupSwapChain()
 {
-    VkDevice device = WyrmEngineStatics::getLogicalDevice();
+    VkDevice device = ChevalierEngineStatics::getLogicalDevice();
     for (auto framebuffer : vSwapChainFramebuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }
@@ -1167,36 +1167,36 @@ void WyrmRenderer::cleanupSwapChain()
     vkDestroySwapchainKHR(device, vSwapChain, nullptr);
 }
 
-void WyrmRenderer::cleanupDepthResources()
+void ChevalierRenderer::cleanupDepthResources()
 {
-    VkDevice device = WyrmEngineStatics::getLogicalDevice();
+    VkDevice device = ChevalierEngineStatics::getLogicalDevice();
     vkDestroyImageView(device, depthImageView, nullptr);
     vkDestroyImage(device, depthImage, nullptr);
     vkFreeMemory(device, depthImageMemory, nullptr);
 }
 
-void WyrmRenderer::cleanupColorResources()
+void ChevalierRenderer::cleanupColorResources()
 {
-    VkDevice device = WyrmEngineStatics::getLogicalDevice();
+    VkDevice device = ChevalierEngineStatics::getLogicalDevice();
     vkDestroyImage(device, colorImage, nullptr);
     vkDestroyImageView(device, colorImageView, nullptr);
     vkFreeMemory(device, colorImageMemory, nullptr);
 }
 
-void WyrmRenderer::mainLoop() {
-    while (!glfwWindowShouldClose(WyrmEngineStatics::getWindow())) {
+void ChevalierRenderer::mainLoop() {
+    while (!glfwWindowShouldClose(ChevalierEngineStatics::getWindow())) {
         glfwPollEvents();
         drawFrame();
     }
 
-    vkDeviceWaitIdle(WyrmEngineStatics::getLogicalDevice());
+    vkDeviceWaitIdle(ChevalierEngineStatics::getLogicalDevice());
 }
 
-void WyrmRenderer::drawFrame() {
-    vkWaitForFences(WyrmEngineStatics::getLogicalDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+void ChevalierRenderer::drawFrame() {
+    vkWaitForFences(ChevalierEngineStatics::getLogicalDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
-    VkResult result = vkAcquireNextImageKHR(WyrmEngineStatics::getLogicalDevice(), vSwapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    VkResult result = vkAcquireNextImageKHR(ChevalierEngineStatics::getLogicalDevice(), vSwapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         recreateSwapChain();
@@ -1206,7 +1206,7 @@ void WyrmRenderer::drawFrame() {
         throw std::runtime_error("failed to acquire swap chain image!");
     }
 
-    vkResetFences(WyrmEngineStatics::getLogicalDevice(), 1, &inFlightFences[currentFrame]);
+    vkResetFences(ChevalierEngineStatics::getLogicalDevice(), 1, &inFlightFences[currentFrame]);
 
     vkResetCommandBuffer(commandBuffers[currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
     recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
@@ -1230,7 +1230,7 @@ void WyrmRenderer::drawFrame() {
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    if (vkQueueSubmit(WyrmEngineStatics::getGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
+    if (vkQueueSubmit(ChevalierEngineStatics::getGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer!");
     }
 
@@ -1246,7 +1246,7 @@ void WyrmRenderer::drawFrame() {
 
     presentInfo.pImageIndices = &imageIndex;
 
-    result = vkQueuePresentKHR(WyrmEngineStatics::getPresentQueue(), &presentInfo);
+    result = vkQueuePresentKHR(ChevalierEngineStatics::getPresentQueue(), &presentInfo);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
         framebufferResized = false;
@@ -1259,7 +1259,7 @@ void WyrmRenderer::drawFrame() {
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void WyrmRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -1297,7 +1297,7 @@ void WyrmRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
     scissor.extent = vSwapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    for (WyrmRenderObject* renderObject : renderObjects)
+    for (ChevalierRenderObject* renderObject : renderObjects)
     {
 
         glm::mat4 objectModelMatrix = renderObject->getModelMatrix();

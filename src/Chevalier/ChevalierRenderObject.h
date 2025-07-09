@@ -1,5 +1,5 @@
 #pragma once
-#include "WyrmCore.h"
+#include "ChevalierCore.h"
 
 struct RenderObjectCreateInfo {
 
@@ -9,22 +9,22 @@ struct RenderObjectCreateInfo {
 };
 
 //Data Objects for the Renderer
-class WyrmRenderObject
+class ChevalierRenderObject
 {
 	static uint16_t count;
 public:
 
 	//Create a basic render object - no assigned model
-	WyrmRenderObject();
+	ChevalierRenderObject();
 
 	//Create a basic render object with a path to a model
-	WyrmRenderObject(const std::string& modelFilepath);
+	ChevalierRenderObject(const std::string& modelFilepath);
 
 	//Create a render object with the create info
-	WyrmRenderObject(RenderObjectCreateInfo* createInfo);
+	ChevalierRenderObject(RenderObjectCreateInfo* createInfo);
 
 	//Destuctor
-	~WyrmRenderObject();
+	~ChevalierRenderObject();
 
 	//Initalizing
 	void InitObject();

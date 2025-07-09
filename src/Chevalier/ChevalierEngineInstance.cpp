@@ -1,4 +1,4 @@
-#include "WyrmEngineInstance.h"
+#include "ChevalierEngineInstance.h"
 
 
 std::vector<const char*> getRequiredExtensions() {
@@ -17,14 +17,14 @@ std::vector<const char*> getRequiredExtensions() {
     return extensions;
 }
 
-WyrmEngineInstance* WyrmEngineInstance::mInstance = nullptr;
+ChevalierEngineInstance* ChevalierEngineInstance::mInstance = nullptr;
 
-WyrmEngineInstance::WyrmEngineInstance()
+ChevalierEngineInstance::ChevalierEngineInstance()
 {
     mInstance = this;
 }
 
-void WyrmEngineInstance::RunInstance()
+void ChevalierEngineInstance::RunInstance()
 {
     initWindow();
     initVulkan();
@@ -35,19 +35,19 @@ void WyrmEngineInstance::RunInstance()
     cleanup();
 }
 
-void WyrmEngineInstance::initWindow()
+void ChevalierEngineInstance::initWindow()
 {
 	glfwInit();
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-	mWindow = glfwCreateWindow(WIDTH, HEIGHT, "WyrmEngine", nullptr, nullptr);
+	mWindow = glfwCreateWindow(WIDTH, HEIGHT, "ChevalierEngine", nullptr, nullptr);
 	glfwSetWindowUserPointer(mWindow, this);
 	glfwSetFramebufferSizeCallback(mWindow, framebufferResizeCallback);
 
 }
 
-void WyrmEngineInstance::initVulkan()
+void ChevalierEngineInstance::initVulkan()
 {
     //Create Instance Objects
     createInstance();
@@ -60,7 +60,7 @@ void WyrmEngineInstance::initVulkan()
     mRenderer.initRenderer();
 }
 
-void WyrmEngineInstance::createInstance()
+void ChevalierEngineInstance::createInstance()
 {
     if (enableValidationLayers && !checkValidationLayerSupport()) {
         throw std::runtime_error("validation layers requested, but not available!");
@@ -68,9 +68,9 @@ void WyrmEngineInstance::createInstance()
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "WyrmRenderEngine";
+    appInfo.pApplicationName = "ChevalierRenderEngine";
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.pEngineName = "Wyrm";
+    appInfo.pEngineName = "Chevalier";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_0;
 
@@ -101,7 +101,7 @@ void WyrmEngineInstance::createInstance()
     }
 }
 
-void WyrmEngineInstance::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
+void ChevalierEngineInstance::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
@@ -109,7 +109,7 @@ void WyrmEngineInstance::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerC
     createInfo.pfnUserCallback = debugCallback;
 }
 
-void WyrmEngineInstance::setupDebugMessenger()
+void ChevalierEngineInstance::setupDebugMessenger()
 {
     if (!enableValidationLayers) return;
 
@@ -117,14 +117,14 @@ void WyrmEngineInstance::setupDebugMessenger()
     populateDebugMessengerCreateInfo(createInfo);
 }
 
-void WyrmEngineInstance::createSurface()
+void ChevalierEngineInstance::createSurface()
 {
     if (glfwCreateWindowSurface(vInstance, mWindow, nullptr, &vSurface) != VK_SUCCESS) {
         throw std::runtime_error("failed to create window surface!");
     }
 }
 
-void WyrmEngineInstance::pickPhysicalDevice()
+void ChevalierEngineInstance::pickPhysicalDevice()
 {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(vInstance, &deviceCount, nullptr);
@@ -149,9 +149,9 @@ void WyrmEngineInstance::pickPhysicalDevice()
     }
 }
 
-void WyrmEngineInstance::createLogicalDevice()
+void ChevalierEngineInstance::createLogicalDevice()
 {
-    QueueFamilyIndices indices = WyrmEngineStatics::findQueueFamilies(vPhysicalDevice);
+    QueueFamilyIndices indices = ChevalierEngineStatics::findQueueFamilies(vPhysicalDevice);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
@@ -189,7 +189,7 @@ void WyrmEngineInstance::createLogicalDevice()
     vkGetDeviceQueue(vDevice, indices.presentFamily.value(), 0, &presentQueue);
 }
 
-void WyrmEngineInstance::cleanup()
+void ChevalierEngineInstance::cleanup()
 {
     //First have the renderer perform its cleanup
     mRenderer.cleanup();
@@ -208,22 +208,22 @@ void WyrmEngineInstance::cleanup()
 
 }
 
-bool WyrmEngineInstance::isDeviceSuitable(VkPhysicalDevice device)
+bool ChevalierEngineInstance::isDeviceSuitable(VkPhysicalDevice device)
 {
-    QueueFamilyIndices indices = WyrmEngineStatics::findQueueFamilies(device);
+    QueueFamilyIndices indices = ChevalierEngineStatics::findQueueFamilies(device);
 
     bool extensionsSupported = checkDeviceExtensionSupport(device);
 
     bool swapChainAdequate = false;
     if (extensionsSupported) {
-        SwapChainSupportDetails swapChainSupport = WyrmEngineStatics::querySwapChainSupport(device);
+        SwapChainSupportDetails swapChainSupport = ChevalierEngineStatics::querySwapChainSupport(device);
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }
 
     return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
-bool WyrmEngineInstance::checkDeviceExtensionSupport(VkPhysicalDevice device)
+bool ChevalierEngineInstance::checkDeviceExtensionSupport(VkPhysicalDevice device)
 {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -243,7 +243,7 @@ bool WyrmEngineInstance::checkDeviceExtensionSupport(VkPhysicalDevice device)
 
 
 
-bool WyrmEngineInstance::checkValidationLayerSupport() {
+bool ChevalierEngineInstance::checkValidationLayerSupport() {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -271,7 +271,7 @@ bool WyrmEngineInstance::checkValidationLayerSupport() {
 
 
 
-VkSampleCountFlagBits WyrmEngineInstance::getMaxUsableSampleCount() {
+VkSampleCountFlagBits ChevalierEngineInstance::getMaxUsableSampleCount() {
 
     VkPhysicalDeviceProperties physicalDeviceProperties;
     vkGetPhysicalDeviceProperties(vPhysicalDevice, &physicalDeviceProperties);

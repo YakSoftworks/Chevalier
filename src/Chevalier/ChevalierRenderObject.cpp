@@ -1,42 +1,42 @@
-#include "WyrmRenderObject.h"
-#include "WyrmEngineStatics.h"
+#include "ChevalierRenderObject.h"
+#include "ChevalierEngineStatics.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-uint16_t WyrmRenderObject::count = 0;
+uint16_t ChevalierRenderObject::count = 0;
 
-WyrmRenderObject::WyrmRenderObject()
+ChevalierRenderObject::ChevalierRenderObject()
 {
     
 
-    if (WyrmRenderObject::count % 2 == 0) {
+    if (ChevalierRenderObject::count % 2 == 0) {
         modelFilepath = "content/models/VikingRoom/viking_room.obj";
-        objectTransform = glm::translate(objectTransform, glm::vec3(0.0f, 0, 2.0f * WyrmRenderObject::count));
+        objectTransform = glm::translate(objectTransform, glm::vec3(0.0f, 0, 2.0f * ChevalierRenderObject::count));
     }
     else {
         modelFilepath = "content/models/monkey.obj";
-        objectTransform = glm::translate(objectTransform, glm::vec3(0.0f, 0, 2.0f * WyrmRenderObject::count));
+        objectTransform = glm::translate(objectTransform, glm::vec3(0.0f, 0, 2.0f * ChevalierRenderObject::count));
     }
     
     count++;
     std::cout << "Object #" << count << std::endl;
 }
 
-WyrmRenderObject::WyrmRenderObject(const std::string& modelFilepath)
+ChevalierRenderObject::ChevalierRenderObject(const std::string& modelFilepath)
 {
 }
-WyrmRenderObject::WyrmRenderObject(RenderObjectCreateInfo* createInfo)
+ChevalierRenderObject::ChevalierRenderObject(RenderObjectCreateInfo* createInfo)
 
 {
 }
 
-WyrmRenderObject::~WyrmRenderObject()
+ChevalierRenderObject::~ChevalierRenderObject()
 {
     cleanupRenderObject();
 }
 
-void WyrmRenderObject::InitObject()
+void ChevalierRenderObject::InitObject()
 {
     //First we must populate the verts data
     LoadObject();
@@ -47,17 +47,17 @@ void WyrmRenderObject::InitObject()
 
 }
 
-void WyrmRenderObject::OnRegisteredToRenderer()
+void ChevalierRenderObject::OnRegisteredToRenderer()
 {
     InitObject();
 }
 
-void WyrmRenderObject::OnUnregisteredToRenderer()
+void ChevalierRenderObject::OnUnregisteredToRenderer()
 {
     delete this;
 }
 
-void WyrmRenderObject::LoadObject()
+void ChevalierRenderObject::LoadObject()
 {
 
     //Check if we have a custom render shape
@@ -108,19 +108,19 @@ void WyrmRenderObject::LoadObject()
     }
 }
 
-bool WyrmRenderObject::customLoad()
+bool ChevalierRenderObject::customLoad()
 {
     //By default, use obj unpacking
     return false;
 }
 
-void WyrmRenderObject::createVertexBuffer()
+void ChevalierRenderObject::createVertexBuffer()
 {
     VkDeviceSize bufferSize = sizeof(verts[0]) * verts.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    WyrmEngineStatics::createBuffer(
+    ChevalierEngineStatics::createBuffer(
         bufferSize,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -128,11 +128,11 @@ void WyrmRenderObject::createVertexBuffer()
         stagingBufferMemory);
 
     void* data;
-    vkMapMemory(WyrmEngineStatics::getLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+    vkMapMemory(ChevalierEngineStatics::getLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
     memcpy(data, verts.data(), (size_t)bufferSize);
-    vkUnmapMemory(WyrmEngineStatics::getLogicalDevice(), stagingBufferMemory);
+    vkUnmapMemory(ChevalierEngineStatics::getLogicalDevice(), stagingBufferMemory);
 
-    WyrmEngineStatics::createBuffer(
+    ChevalierEngineStatics::createBuffer(
         bufferSize,
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -140,35 +140,35 @@ void WyrmRenderObject::createVertexBuffer()
         mVertexBufferMemory
     );
 
-    WyrmEngineStatics::copyBuffer(stagingBuffer, mVertexBuffer, bufferSize);
+    ChevalierEngineStatics::copyBuffer(stagingBuffer, mVertexBuffer, bufferSize);
 
-    vkDestroyBuffer(WyrmEngineStatics::getLogicalDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(WyrmEngineStatics::getLogicalDevice(), stagingBufferMemory, nullptr);
+    vkDestroyBuffer(ChevalierEngineStatics::getLogicalDevice(), stagingBuffer, nullptr);
+    vkFreeMemory(ChevalierEngineStatics::getLogicalDevice(), stagingBufferMemory, nullptr);
 }
 
-void WyrmRenderObject::createIndexBuffer()
+void ChevalierRenderObject::createIndexBuffer()
 {
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    WyrmEngineStatics::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    ChevalierEngineStatics::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
     void* data;
-    vkMapMemory(WyrmEngineStatics::getLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+    vkMapMemory(ChevalierEngineStatics::getLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
     memcpy(data, indices.data(), (size_t)bufferSize);
-    vkUnmapMemory(WyrmEngineStatics::getLogicalDevice(), stagingBufferMemory);
+    vkUnmapMemory(ChevalierEngineStatics::getLogicalDevice(), stagingBufferMemory);
 
-    WyrmEngineStatics::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mIndexBuffer, mIndexBufferMemory);
+    ChevalierEngineStatics::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mIndexBuffer, mIndexBufferMemory);
 
-    WyrmEngineStatics::copyBuffer(stagingBuffer, mIndexBuffer, bufferSize);
+    ChevalierEngineStatics::copyBuffer(stagingBuffer, mIndexBuffer, bufferSize);
 
-    vkDestroyBuffer(WyrmEngineStatics::getLogicalDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(WyrmEngineStatics::getLogicalDevice(), stagingBufferMemory, nullptr);
+    vkDestroyBuffer(ChevalierEngineStatics::getLogicalDevice(), stagingBuffer, nullptr);
+    vkFreeMemory(ChevalierEngineStatics::getLogicalDevice(), stagingBufferMemory, nullptr);
 }
 
 
-void WyrmRenderObject::RecordObjectDraw(VkCommandBuffer commandBuffer)
+void ChevalierRenderObject::RecordObjectDraw(VkCommandBuffer commandBuffer)
 {
     VkBuffer vertexBuffers[] = { mVertexBuffer };
     VkDeviceSize offsets[] = { 0 };
@@ -181,9 +181,9 @@ void WyrmRenderObject::RecordObjectDraw(VkCommandBuffer commandBuffer)
 
 }
 
-void WyrmRenderObject::cleanupRenderObject()
+void ChevalierRenderObject::cleanupRenderObject()
 {
-    VkDevice device = WyrmEngineStatics::getLogicalDevice();
+    VkDevice device = ChevalierEngineStatics::getLogicalDevice();
     vkDestroyBuffer(device, mIndexBuffer, nullptr);
     vkFreeMemory(device, mIndexBufferMemory, nullptr);
 

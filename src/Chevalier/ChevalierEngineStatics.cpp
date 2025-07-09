@@ -1,44 +1,44 @@
-#include "WyrmEngineStatics.h"
+#include "ChevalierEngineStatics.h"
 
-#include "WyrmEngineInstance.h"
-#include "WyrmRenderer.h"
+#include "ChevalierEngineInstance.h"
+#include "ChevalierRenderer.h"
 
-VkDevice WyrmEngineStatics::getLogicalDevice()
+VkDevice ChevalierEngineStatics::getLogicalDevice()
 {
-    return WyrmEngineInstance::getInstance()->vDevice;
+    return ChevalierEngineInstance::getInstance()->vDevice;
 }
 
-VkPhysicalDevice WyrmEngineStatics::getPhysicalDevice()
+VkPhysicalDevice ChevalierEngineStatics::getPhysicalDevice()
 {
-    return WyrmEngineInstance::getInstance()->vPhysicalDevice;
+    return ChevalierEngineInstance::getInstance()->vPhysicalDevice;
 }
 
-VkSampleCountFlagBits WyrmEngineStatics::getSamplesCount()
+VkSampleCountFlagBits ChevalierEngineStatics::getSamplesCount()
 {
-    return WyrmEngineInstance::getInstance()->msaaSamples;
+    return ChevalierEngineInstance::getInstance()->msaaSamples;
 }
 
-VkQueue WyrmEngineStatics::getGraphicsQueue()
+VkQueue ChevalierEngineStatics::getGraphicsQueue()
 {
-    return WyrmEngineInstance::getInstance()->graphicsQueue;
+    return ChevalierEngineInstance::getInstance()->graphicsQueue;
 }
 
-VkQueue WyrmEngineStatics::getPresentQueue()
+VkQueue ChevalierEngineStatics::getPresentQueue()
 {
-    return WyrmEngineInstance::getInstance()->presentQueue;
+    return ChevalierEngineInstance::getInstance()->presentQueue;
 }
 
-VkSurfaceKHR WyrmEngineStatics::getSurface()
+VkSurfaceKHR ChevalierEngineStatics::getSurface()
 {
-    return WyrmEngineInstance::getInstance()->vSurface;
+    return ChevalierEngineInstance::getInstance()->vSurface;
 }
 
-GLFWwindow* WyrmEngineStatics::getWindow()
+GLFWwindow* ChevalierEngineStatics::getWindow()
 {
-    return WyrmEngineInstance::getInstance()->mWindow;
+    return ChevalierEngineInstance::getInstance()->mWindow;
 }
 
-QueueFamilyIndices WyrmEngineStatics::findQueueFamilies(VkPhysicalDevice device) {
+QueueFamilyIndices ChevalierEngineStatics::findQueueFamilies(VkPhysicalDevice device) {
     QueueFamilyIndices indices;
 
     uint32_t queueFamilyCount = 0;
@@ -54,7 +54,7 @@ QueueFamilyIndices WyrmEngineStatics::findQueueFamilies(VkPhysicalDevice device)
         }
 
         VkBool32 presentSupport = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, WyrmEngineStatics::getSurface(), &presentSupport);
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, ChevalierEngineStatics::getSurface(), &presentSupport);
 
         if (presentSupport) {
             indices.presentFamily = i;
@@ -70,38 +70,38 @@ QueueFamilyIndices WyrmEngineStatics::findQueueFamilies(VkPhysicalDevice device)
     return indices;
 }
 
-SwapChainSupportDetails WyrmEngineStatics::querySwapChainSupport(VkPhysicalDevice device)
+SwapChainSupportDetails ChevalierEngineStatics::querySwapChainSupport(VkPhysicalDevice device)
 {
     SwapChainSupportDetails details;
 
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, WyrmEngineStatics::getSurface(), &details.capabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, ChevalierEngineStatics::getSurface(), &details.capabilities);
 
     uint32_t formatCount;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, WyrmEngineStatics::getSurface(), &formatCount, nullptr);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, ChevalierEngineStatics::getSurface(), &formatCount, nullptr);
 
     if (formatCount != 0) {
         details.formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, WyrmEngineStatics::getSurface(), &formatCount, details.formats.data());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, ChevalierEngineStatics::getSurface(), &formatCount, details.formats.data());
     }
 
     uint32_t presentModeCount;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(device, WyrmEngineStatics::getSurface(), &presentModeCount, nullptr);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device, ChevalierEngineStatics::getSurface(), &presentModeCount, nullptr);
 
     if (presentModeCount != 0) {
         details.presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, WyrmEngineStatics::getSurface(), &presentModeCount, details.presentModes.data());
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, ChevalierEngineStatics::getSurface(), &presentModeCount, details.presentModes.data());
     }
 
     return details;
     
 }
 
-VkDescriptorPool WyrmEngineStatics::getDescriptorPool()
+VkDescriptorPool ChevalierEngineStatics::getDescriptorPool()
 {
-    return WyrmRenderer::getInstance()->descriptorPool;
+    return ChevalierRenderer::getInstance()->descriptorPool;
 }
 
-std::vector<char> WyrmEngineStatics::readFile(const std::string& filename)
+std::vector<char> ChevalierEngineStatics::readFile(const std::string& filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
@@ -120,15 +120,15 @@ std::vector<char> WyrmEngineStatics::readFile(const std::string& filename)
     return buffer;
 }
 
-VkCommandBuffer WyrmEngineStatics::beginSingleTimeCommands() {
+VkCommandBuffer ChevalierEngineStatics::beginSingleTimeCommands() {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = WyrmRenderer::getInstance()->commandPool;
+    allocInfo.commandPool = ChevalierRenderer::getInstance()->commandPool;
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(WyrmEngineStatics::getLogicalDevice(), &allocInfo, &commandBuffer);
+    vkAllocateCommandBuffers(ChevalierEngineStatics::getLogicalDevice(), &allocInfo, &commandBuffer);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -139,7 +139,7 @@ VkCommandBuffer WyrmEngineStatics::beginSingleTimeCommands() {
     return commandBuffer;
 }
 
-void WyrmEngineStatics::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
+void ChevalierEngineStatics::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
     vkEndCommandBuffer(commandBuffer);
 
     VkSubmitInfo submitInfo{};
@@ -147,13 +147,13 @@ void WyrmEngineStatics::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    vkQueueSubmit(WyrmEngineStatics::getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(WyrmEngineStatics::getGraphicsQueue());
+    vkQueueSubmit(ChevalierEngineStatics::getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(ChevalierEngineStatics::getGraphicsQueue());
 
-    vkFreeCommandBuffers(WyrmEngineStatics::getLogicalDevice(), WyrmRenderer::getInstance()->commandPool, 1, &commandBuffer);
+    vkFreeCommandBuffers(ChevalierEngineStatics::getLogicalDevice(), ChevalierRenderer::getInstance()->commandPool, 1, &commandBuffer);
 }
 
-void WyrmEngineStatics::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
+void ChevalierEngineStatics::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
 {
     //Creation Object
     VkBufferCreateInfo bufferInfo{};
@@ -164,39 +164,39 @@ void WyrmEngineStatics::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage
     bufferInfo.usage = usage;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateBuffer(WyrmEngineStatics::getLogicalDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+    if (vkCreateBuffer(ChevalierEngineStatics::getLogicalDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create buffer");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(WyrmEngineStatics::getLogicalDevice(), buffer, &memRequirements);
+    vkGetBufferMemoryRequirements(ChevalierEngineStatics::getLogicalDevice(), buffer, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = WyrmEngineStatics::findMemoryType(memRequirements.memoryTypeBits, properties);
+    allocInfo.memoryTypeIndex = ChevalierEngineStatics::findMemoryType(memRequirements.memoryTypeBits, properties);
 
 
-    if (vkAllocateMemory(WyrmEngineStatics::getLogicalDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(ChevalierEngineStatics::getLogicalDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
         throw std::runtime_error("Failed to allocate buffer memory");
     }
 
-    vkBindBufferMemory(WyrmEngineStatics::getLogicalDevice(), buffer, bufferMemory, 0);
+    vkBindBufferMemory(ChevalierEngineStatics::getLogicalDevice(), buffer, bufferMemory, 0);
 }
 
-void WyrmEngineStatics::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+void ChevalierEngineStatics::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
-    VkCommandBuffer commandBuffer = WyrmEngineStatics::beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = ChevalierEngineStatics::beginSingleTimeCommands();
 
     VkBufferCopy copyRegion{};
     copyRegion.size = size;
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-    WyrmEngineStatics::endSingleTimeCommands(commandBuffer);
+    ChevalierEngineStatics::endSingleTimeCommands(commandBuffer);
 }
 
-uint32_t WyrmEngineStatics::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+uint32_t ChevalierEngineStatics::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(getPhysicalDevice(), &memProperties);

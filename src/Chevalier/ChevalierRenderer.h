@@ -1,36 +1,36 @@
 #pragma once
 
-#include "WyrmCore.h"
+#include "ChevalierCore.h"
 
-class WyrmRenderObject;
+class ChevalierRenderObject;
 
 
 
-class WyrmRenderer
+class ChevalierRenderer
 {
 
 
 public:
 
-	WyrmRenderer();
+	ChevalierRenderer();
 
 	void SetFrameBufferResized(bool value);
 
-	static void RegisterRenderObject(WyrmRenderObject* newObject);
-	static void UnregisterRenderObject(WyrmRenderObject* object);
+	static void RegisterRenderObject(ChevalierRenderObject* newObject);
+	static void UnregisterRenderObject(ChevalierRenderObject* object);
 
 	void initRenderer();
 
 	//Friend Access for statics
-	friend class WyrmEngineStatics;
+	friend class ChevalierEngineStatics;
 
 
 
 protected:
 	//Singleton
-	static WyrmRenderer* mInstance;
+	static ChevalierRenderer* mInstance;
 
-	static WyrmRenderer* getInstance() { return mInstance; }
+	static ChevalierRenderer* getInstance() { return mInstance; }
 
 protected:
 
@@ -96,7 +96,7 @@ protected:
 	VkImageView colorImageView;
 
 	//Render Objects
-	std::vector<WyrmRenderObject*> renderObjects;
+	std::vector<ChevalierRenderObject*> renderObjects;
 
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;

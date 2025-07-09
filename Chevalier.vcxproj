@@ -128,6 +128,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Chevalier.cpp" />
+    <ClCompile Include="src\Chevalier\ChevalierEngineInstance.cpp" />
+    <ClCompile Include="src\Chevalier\ChevalierEngineStatics.cpp" />
+    <ClCompile Include="src\Chevalier\ChevalierRenderer.cpp" />
+    <ClCompile Include="src\Chevalier\ChevalierRenderObject.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Chevalier\ChevalierCore.h" />
+    <ClInclude Include="src\Chevalier\ChevalierEngineInstance.h" />
+    <ClInclude Include="src\Chevalier\ChevalierEngineStatics.h" />
+    <ClInclude Include="src\Chevalier\ChevalierInterfaces.h" />
+    <ClInclude Include="src\Chevalier\ChevalierRenderer.h" />
+    <ClInclude Include="src\Chevalier\ChevalierRenderObject.h" />
+    <ClInclude Include="src\Chevalier\ChevalierTypes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

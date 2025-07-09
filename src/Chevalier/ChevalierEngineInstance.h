@@ -2,9 +2,9 @@
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
 
-#include "WyrmCore.h"
-#include "WyrmRenderer.h"
-#include "WyrmEngineStatics.h"
+#include "ChevalierCore.h"
+#include "ChevalierRenderer.h"
+#include "ChevalierEngineStatics.h"
 
 
 const std::vector<const char*> validationLayers = {
@@ -23,7 +23,7 @@ const bool enableValidationLayers = true;
 #endif
 
 //Main class of the engine... this runs the rest of the vulkan implementation
-class WyrmEngineInstance
+class ChevalierEngineInstance
 {
 
 	//TODO: MAKE SINGLETON
@@ -31,7 +31,7 @@ class WyrmEngineInstance
 public:
 
 	//Constructor
-	WyrmEngineInstance();
+	ChevalierEngineInstance();
 
 	//Function called by main to run the instance
 	void RunInstance();
@@ -61,8 +61,8 @@ protected:
 
 
 	//Singleton
-	static WyrmEngineInstance* mInstance;
-	static WyrmEngineInstance* getInstance() { return mInstance; }
+	static ChevalierEngineInstance* mInstance;
+	static ChevalierEngineInstance* getInstance() { return mInstance; }
 
 
 	//Helpers
@@ -71,7 +71,7 @@ protected:
 public:
 	
 	//Friends
-	friend WyrmEngineStatics;
+	friend ChevalierEngineStatics;
 	
 protected:
 	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
@@ -99,7 +99,7 @@ protected:
 	VkDevice vDevice;
 
 	//Renderer Variables
-	WyrmRenderer mRenderer;
+	ChevalierRenderer mRenderer;
 
 	//Debug Stuff
 	VkDebugUtilsMessengerEXT vDebugMessenger;
@@ -107,7 +107,7 @@ protected:
 
 	//Callbacks
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
-		auto app = reinterpret_cast<WyrmEngineInstance*>(glfwGetWindowUserPointer(window));
+		auto app = reinterpret_cast<ChevalierEngineInstance*>(glfwGetWindowUserPointer(window));
 		app->mRenderer.SetFrameBufferResized(true);
 	}
 
