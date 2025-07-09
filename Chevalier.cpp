@@ -3,10 +3,13 @@
 
 #include <iostream>
 
+#include "src/Chevalier/ChevalierEngineInstance.h"
+
 int main()
 {
     std::cout << "Hello World!\n";
 
-
+    ChevalierEngineInstance cInstance = ChevalierEngineInstance();
+    cInstance.RunInstance();
 
 }
