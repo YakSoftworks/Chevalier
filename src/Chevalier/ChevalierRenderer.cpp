@@ -55,8 +55,9 @@ void ChevalierRenderer::initRenderer()
 	//Command Buffers
 	//Sync Objects
 
-    createSwapChain();
-    createImageViews();
+    swapchainManager.createSwapchain();
+    swapchainManager.createImageViews();
+
     createRenderPass();
 
     createDescriptorSetLayout();
@@ -89,13 +90,6 @@ void ChevalierRenderer::initRenderer()
     RegisterRenderObject(RO2);
 
 
-}
-void ChevalierRenderer::createImageViews() {
-    vSwapChainImageViews.resize(vSwapChainImages.size());
-
-    for (size_t i = 0; i < vSwapChainImages.size(); i++) {
-        vSwapChainImageViews[i] = createImageView(vSwapChainImages[i], vSwapChainImageFormat, VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, 1);
-    }
 }
 
 
@@ -266,61 +260,9 @@ void ChevalierRenderer::createGraphicsPipeline() {
     vkDestroyShaderModule(ChevalierEngineStatics::getLogicalDevice(), vertShaderModule, nullptr);
 }
 
-void ChevalierRenderer::createSwapChain() {
-    SwapChainSupportDetails swapChainSupport = ChevalierEngineStatics::querySwapChainSupport(ChevalierEngineStatics::getPhysicalDevice());
-
-    VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-    VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-    VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
-
-    uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-    if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
-        imageCount = swapChainSupport.capabilities.maxImageCount;
-    }
-
-    VkSwapchainCreateInfoKHR createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = ChevalierEngineStatics::getSurface();
-
-    createInfo.minImageCount = imageCount;
-    createInfo.imageFormat = surfaceFormat.format;
-    createInfo.imageColorSpace = surfaceFormat.colorSpace;
-    createInfo.imageExtent = extent;
-    createInfo.imageArrayLayers = 1;
-    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-    QueueFamilyIndices indices = ChevalierEngineStatics::findQueueFamilies(ChevalierEngineStatics::getPhysicalDevice());
-    uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
-
-    if (indices.graphicsFamily != indices.presentFamily) {
-        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-        createInfo.queueFamilyIndexCount = 2;
-        createInfo.pQueueFamilyIndices = queueFamilyIndices;
-    }
-    else {
-        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    }
-
-    createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    createInfo.presentMode = presentMode;
-    createInfo.clipped = VK_TRUE;
-
-    if (vkCreateSwapchainKHR(ChevalierEngineStatics::getLogicalDevice(), &createInfo, nullptr, &vSwapChain) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create swap chain!");
-    }
-
-    vkGetSwapchainImagesKHR(ChevalierEngineStatics::getLogicalDevice(), vSwapChain, &imageCount, nullptr);
-    vSwapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(ChevalierEngineStatics::getLogicalDevice(), vSwapChain, &imageCount, vSwapChainImages.data());
-
-    vSwapChainImageFormat = surfaceFormat.format;
-    vSwapChainExtent = extent;
-}
-
 void ChevalierRenderer::createRenderPass() {
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = vSwapChainImageFormat;
+    colorAttachment.format = swapchainManager.swapchainImageFormat;
     colorAttachment.samples = ChevalierEngineStatics::getSamplesCount();
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -331,7 +273,7 @@ void ChevalierRenderer::createRenderPass() {
 
     VkAttachmentDescription colorAttachmentResolve{};
     colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachmentResolve.format = vSwapChainImageFormat;
+    colorAttachmentResolve.format = swapchainManager.swapchainImageFormat;
     colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
@@ -430,18 +372,18 @@ void ChevalierRenderer::createUniformBuffers() {
 
 void ChevalierRenderer::createFramebuffers()
 {
-    vSwapChainFramebuffers.resize(vSwapChainImageViews.size());
+    swapchainManager.swapchainFramebuffers.resize(swapchainManager.swapchainImageViews.size());
 
     if (colorImageView == nullptr) {
         throw std::runtime_error("Color Image View is INVALID");
     }
 
 
-    for (size_t i = 0; i < vSwapChainImageViews.size(); i++) {
+    for (size_t i = 0; i < swapchainManager.swapchainImageViews.size(); i++) {
         VkImageView attachments[] = {
             colorImageView,
             depthImageView,
-            vSwapChainImageViews[i],
+            swapchainManager.swapchainImageViews[i],
 
         };
 
@@ -450,11 +392,11 @@ void ChevalierRenderer::createFramebuffers()
         framebufferInfo.renderPass = renderPass;
         framebufferInfo.attachmentCount = 3;
         framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = vSwapChainExtent.width;
-        framebufferInfo.height = vSwapChainExtent.height;
+        framebufferInfo.width = swapchainManager.swapchainExtent.width;
+        framebufferInfo.height = swapchainManager.swapchainExtent.height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(ChevalierEngineStatics::getLogicalDevice(), &framebufferInfo, nullptr, &vSwapChainFramebuffers[i]) != VK_SUCCESS) {
+        if (vkCreateFramebuffer(ChevalierEngineStatics::getLogicalDevice(), &framebufferInfo, nullptr, &swapchainManager.swapchainFramebuffers[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
@@ -584,46 +526,6 @@ void ChevalierRenderer::createSyncObjects()
 	}
 }
 
-VkSurfaceFormatKHR ChevalierRenderer::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
-    for (const auto& availableFormat : availableFormats) {
-        if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-            return availableFormat;
-        }
-    }
-
-    return availableFormats[0];
-}
-
-VkPresentModeKHR ChevalierRenderer::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
-    for (const auto& availablePresentMode : availablePresentModes) {
-        if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-            return availablePresentMode;
-        }
-    }
-
-    return VK_PRESENT_MODE_FIFO_KHR;
-}
-
-VkExtent2D ChevalierRenderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
-    if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
-        return capabilities.currentExtent;
-    }
-    else {
-        int width, height;
-        glfwGetFramebufferSize(ChevalierEngineStatics::getWindow(), &width, &height);
-
-        VkExtent2D actualExtent = {
-            static_cast<uint32_t>(width),
-            static_cast<uint32_t>(height)
-        };
-
-        actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-        actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
-        return actualExtent;
-    }
-}
-
 void ChevalierRenderer::updateUniformBuffer(uint32_t currentImage) {
     static auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -672,7 +574,7 @@ void ChevalierRenderer::createTextureImage() {
 
     stbi_image_free(pixels);
 
-    createImage(texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
+    ChevalierEngineStatics::createImage(texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
 
     transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
     copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
@@ -683,45 +585,6 @@ void ChevalierRenderer::createTextureImage() {
     vkDestroyBuffer(ChevalierEngineStatics::getLogicalDevice(), stagingBuffer, nullptr);
     vkFreeMemory(ChevalierEngineStatics::getLogicalDevice(), stagingBufferMemory, nullptr);
 }
-
-void ChevalierRenderer::createImage(uint32_t width, uint32_t height, uint32_t mipLevel, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling,
-    VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
-{
-    VkImageCreateInfo imageInfo{};
-    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.extent.width = width;
-    imageInfo.extent.height = height;
-    imageInfo.extent.depth = 1;
-    imageInfo.mipLevels = mipLevel;
-    imageInfo.arrayLayers = 1;
-    imageInfo.format = format;
-    imageInfo.tiling = tiling;
-    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = usage;
-    imageInfo.samples = numSamples;
-    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-    if (vkCreateImage(ChevalierEngineStatics::getLogicalDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create image!");
-    }
-
-    VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(ChevalierEngineStatics::getLogicalDevice(), image, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = ChevalierEngineStatics::findMemoryType(memRequirements.memoryTypeBits, properties);
-
-    if (vkAllocateMemory(ChevalierEngineStatics::getLogicalDevice(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
-        throw std::runtime_error("failed to allocate image memory!");
-    }
-
-    vkBindImageMemory(ChevalierEngineStatics::getLogicalDevice(), image, imageMemory, 0);
-}
-
-
 
 
 
@@ -822,32 +685,12 @@ void ChevalierRenderer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32
 }
 
 void ChevalierRenderer::createTextureImageView() {
-    textureImageView = createImageView(
+    textureImageView = ChevalierEngineStatics::createImageView(
         textureImage,
         VK_FORMAT_R8G8B8A8_SRGB,
         VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
         mipLevels
     );
-}
-
-VkImageView ChevalierRenderer::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevel) {
-    VkImageViewCreateInfo viewInfo{};
-    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    viewInfo.image = image;
-    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    viewInfo.format = format;
-    viewInfo.subresourceRange.aspectMask = aspectFlags;
-    viewInfo.subresourceRange.baseMipLevel = 0;
-    viewInfo.subresourceRange.levelCount = mipLevel;
-    viewInfo.subresourceRange.baseArrayLayer = 0;
-    viewInfo.subresourceRange.layerCount = 1;
-
-    VkImageView imageView;
-    if (vkCreateImageView(ChevalierEngineStatics::getLogicalDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create image view!");
-    }
-
-    return imageView;
 }
 
 void ChevalierRenderer::createTextureSampler() {
@@ -886,9 +729,9 @@ void ChevalierRenderer::createDepthResources() {
     VkFormat depthFormat = findDepthFormat();
 
     //Create Depth Image
-    createImage(
-        vSwapChainExtent.width,
-        vSwapChainExtent.height,
+    ChevalierEngineStatics::createImage(
+        swapchainManager.swapchainExtent.width,
+        swapchainManager.swapchainExtent.height,
         1,
         ChevalierEngineStatics::getSamplesCount(),
         depthFormat,
@@ -899,7 +742,7 @@ void ChevalierRenderer::createDepthResources() {
         depthImageMemory);
 
 
-    depthImageView = createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+    depthImageView = ChevalierEngineStatics::createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
     transitionImageLayout(depthImage, depthFormat,
         VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
@@ -1076,12 +919,20 @@ VkSampleCountFlagBits ChevalierRenderer::getMaxUsableSampleCount() {
 }
 
 void ChevalierRenderer::createColorResources() {
-    VkFormat colorFormat = vSwapChainImageFormat;
+    VkFormat colorFormat = swapchainManager.swapchainImageFormat;
 
-    createImage(vSwapChainExtent.width, vSwapChainExtent.height, 1, ChevalierEngineStatics::getSamplesCount(), colorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage, colorImageMemory);
+    ChevalierEngineStatics::createImage(swapchainManager.swapchainExtent.width,
+        swapchainManager.swapchainExtent.height,
+        1,
+        ChevalierEngineStatics::getSamplesCount(),
+        colorFormat,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        colorImage,
+        colorImageMemory);
 
-    colorImageView = createImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+    colorImageView = ChevalierEngineStatics::createImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
 
 void ChevalierRenderer::recreateSwapChain() {
@@ -1094,12 +945,12 @@ void ChevalierRenderer::recreateSwapChain() {
 
     vkDeviceWaitIdle(ChevalierEngineStatics::getLogicalDevice());
 
-    cleanupSwapChain();
+    swapchainManager.cleanupSwapchain();
     cleanupColorResources();
     cleanupDepthResources();
 
-    createSwapChain();
-    createImageViews();
+    swapchainManager.createSwapchain();
+    swapchainManager.createImageViews();
 
     createColorResources();
     createDepthResources();
@@ -1109,7 +960,7 @@ void ChevalierRenderer::recreateSwapChain() {
 
 void ChevalierRenderer::cleanup()
 {
-    cleanupSwapChain();
+    swapchainManager.cleanupSwapchain();
 
     cleanupColorResources();
     cleanupDepthResources();
@@ -1153,20 +1004,6 @@ void ChevalierRenderer::cleanup()
     vkDestroyCommandPool(device, commandPool, nullptr);
 }
 
-void ChevalierRenderer::cleanupSwapChain()
-{
-    VkDevice device = ChevalierEngineStatics::getLogicalDevice();
-    for (auto framebuffer : vSwapChainFramebuffers) {
-        vkDestroyFramebuffer(device, framebuffer, nullptr);
-    }
-
-    for (auto imageView : vSwapChainImageViews) {
-        vkDestroyImageView(device, imageView, nullptr);
-    }
-
-    vkDestroySwapchainKHR(device, vSwapChain, nullptr);
-}
-
 void ChevalierRenderer::cleanupDepthResources()
 {
     VkDevice device = ChevalierEngineStatics::getLogicalDevice();
@@ -1196,7 +1033,7 @@ void ChevalierRenderer::drawFrame() {
     vkWaitForFences(ChevalierEngineStatics::getLogicalDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
-    VkResult result = vkAcquireNextImageKHR(ChevalierEngineStatics::getLogicalDevice(), vSwapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    VkResult result = vkAcquireNextImageKHR(ChevalierEngineStatics::getLogicalDevice(), swapchainManager.swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         recreateSwapChain();
@@ -1240,9 +1077,9 @@ void ChevalierRenderer::drawFrame() {
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = signalSemaphores;
 
-    VkSwapchainKHR swapChains[] = { vSwapChain };
+    VkSwapchainKHR swapchains[] = { swapchainManager.swapchain };
     presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = swapChains;
+    presentInfo.pSwapchains = swapchains;
 
     presentInfo.pImageIndices = &imageIndex;
 
@@ -1271,9 +1108,9 @@ void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;
-    renderPassInfo.framebuffer = vSwapChainFramebuffers[imageIndex];
+    renderPassInfo.framebuffer = swapchainManager.swapchainFramebuffers[imageIndex];
     renderPassInfo.renderArea.offset = { 0, 0 };
-    renderPassInfo.renderArea.extent = vSwapChainExtent;
+    renderPassInfo.renderArea.extent = swapchainManager.swapchainExtent;
 
     VkClearValue clearColor[2] = { {{0.0f, 0.0f, 0.0f, 1.0f}}, {1.0f, 0} };
     renderPassInfo.clearValueCount = 2;
@@ -1286,15 +1123,15 @@ void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = (float)vSwapChainExtent.width;
-    viewport.height = (float)vSwapChainExtent.height;
+    viewport.width = (float)swapchainManager.swapchainExtent.width;
+    viewport.height = (float)swapchainManager.swapchainExtent.height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
     VkRect2D scissor{};
     scissor.offset = { 0, 0 };
-    scissor.extent = vSwapChainExtent;
+    scissor.extent = swapchainManager.swapchainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
     for (ChevalierRenderObject* renderObject : renderObjects)
@@ -1309,7 +1146,10 @@ void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
         //LookAt(Eye, At, Up)
         ubo.view = glm::lookAt(glm::vec3(10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        ubo.proj = glm::perspective(glm::radians(45.f), vSwapChainExtent.width / (float)vSwapChainExtent.height, 0.1f, 10.f);
+        ubo.proj = glm::perspective(glm::radians(45.f),
+            swapchainManager.swapchainExtent.width / (float)swapchainManager.swapchainExtent.height,
+            0.1f,
+            10.f);
 
         ubo.proj[1][1] *= -1;
 

@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Jackp\Desktop\Chevalier\Libraries\GLFW3.4\include;C:\Users\Jackp\Desktop\Chevalier\Libraries\GLM;C:\Users\Jackp\Desktop\Chevalier\Libraries\VULKAN\Include;C:\Users\Jackp\Desktop\Chevalier\Libraries\FBX\include;C:\Users\Jackp\Documents\Visual Studio 2022\Libraries\tinyobjloader-release;C:\Users\Jackp\Documents\Visual Studio 2022\Libraries\stb-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jackp\Desktop\Chevalier\Libraries\GLFW3.4\include;C:\Users\Jackp\Desktop\Chevalier\Libraries\GLM;C:\Users\Jackp\Desktop\Chevalier\Libraries\VULKAN\Include;C:\Users\Jackp\Desktop\Chevalier\Libraries\FBX\include;C:\Users\Jackp\Documents\Visual Studio 2022\Libraries\tinyobjloader-release;C:\Users\Jackp\Documents\Visual Studio 2022\Libraries\stb-master;C:\Users\Jackp\Desktop\Chevalier\src\Chevalier;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -136,6 +136,7 @@
     <ClCompile Include="src\Chevalier\ChevalierEngineStatics.cpp" />
     <ClCompile Include="src\Chevalier\ChevalierRenderer.cpp" />
     <ClCompile Include="src\Chevalier\ChevalierRenderObject.cpp" />
+    <ClCompile Include="src\Chevalier\RendererClasses\SwapChainManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Chevalier\ChevalierCore.h" />
@@ -145,6 +146,7 @@
     <ClInclude Include="src\Chevalier\ChevalierRenderer.h" />
     <ClInclude Include="src\Chevalier\ChevalierRenderObject.h" />
     <ClInclude Include="src\Chevalier\ChevalierTypes.h" />
+    <ClInclude Include="src\Chevalier\RendererClasses\SwapChainManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

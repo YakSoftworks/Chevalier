@@ -30,6 +30,9 @@
     <ClCompile Include="src\Chevalier\ChevalierRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Chevalier\RendererClasses\SwapChainManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Chevalier\ChevalierCore.h">
@@ -51,6 +54,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Chevalier\ChevalierTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chevalier\RendererClasses\SwapChainManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
