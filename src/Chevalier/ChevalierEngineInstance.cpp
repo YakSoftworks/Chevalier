@@ -214,13 +214,13 @@ bool ChevalierEngineInstance::isDeviceSuitable(VkPhysicalDevice device)
 
     bool extensionsSupported = checkDeviceExtensionSupport(device);
 
-    bool swapChainAdequate = false;
+    bool swapchainAdequate = false;
     if (extensionsSupported) {
-        SwapChainSupportDetails swapChainSupport = ChevalierEngineStatics::querySwapChainSupport(device);
-        swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+        SwapChainSupportDetails swapchainSupport = ChevalierEngineStatics::querySwapChainSupport(device);
+        swapchainAdequate = !swapchainSupport.formats.empty() && !swapchainSupport.presentModes.empty();
     }
 
-    return indices.isComplete() && extensionsSupported && swapChainAdequate;
+    return indices.isComplete() && extensionsSupported && swapchainAdequate;
 }
 
 bool ChevalierEngineInstance::checkDeviceExtensionSupport(VkPhysicalDevice device)

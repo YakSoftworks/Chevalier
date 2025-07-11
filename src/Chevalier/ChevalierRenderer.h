@@ -2,6 +2,8 @@
 
 #include "ChevalierCore.h"
 
+#include "RendererClasses/SwapChainManager.h"
+
 class ChevalierRenderObject;
 
 
@@ -37,13 +39,10 @@ protected:
 
 
 	//Creations
-	void createImageViews();
 
 	void createDescriptorSetLayout();
 
 	void createGraphicsPipeline();
-
-	void createSwapChain();
 
 	void createDescriptorPool();
 	void createDescriptorSets();
@@ -56,24 +55,14 @@ protected:
 
 	void createRenderPass();
 
-	//Helpers
-	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-
-
-
 	//Members
 
 	//Vulkan members
 
 	//Swap Chain + properties
-	VkSwapchainKHR vSwapChain;
-	std::vector<VkImage> vSwapChainImages;
-	VkFormat vSwapChainImageFormat;
-	VkExtent2D vSwapChainExtent;
-	std::vector<VkImageView> vSwapChainImageViews;
-	std::vector<VkFramebuffer> vSwapChainFramebuffers;
+	SwapChainManager swapchainManager;
+
+
 
 
 	//Sync Objects
@@ -129,16 +118,11 @@ protected:
 
     void createTextureImage();
 
-    void createImage(uint32_t width, uint32_t height, uint32_t mipLevel, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling,
-        VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-
     void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t mipLevel);
 
     void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
     void createTextureImageView();
-
-    VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevel);
 
     void createTextureSampler();
 
@@ -149,7 +133,6 @@ protected:
     VkFormat findDepthFormat();
 
     bool hasStencilComponent(VkFormat format);
-
 
     void generateMipmaps(VkImage image, VkFormat imageFormat, uint32_t texWidth, uint32_t texHeight, uint32_t mipLevels);
 
@@ -165,7 +148,8 @@ protected:
 public:
 	void cleanup();
 protected:
-	void cleanupSwapChain();
+	
+
 	void cleanupDepthResources();
 	void cleanupColorResources();
 
