@@ -15,6 +15,7 @@ public:
 	static VkQueue getPresentQueue();
 	static VkSurfaceKHR getSurface();
 	static GLFWwindow* getWindow();
+	static VkRenderPass getRenderPass();
 
 	static QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 	
@@ -50,6 +51,8 @@ public:
 		VkMemoryPropertyFlags properties, 
 		VkImage& image, 
 		VkDeviceMemory& imageMemory);
+
+	static VkDescriptorSetLayout getDescriptorSetLayout();
 
 };
 

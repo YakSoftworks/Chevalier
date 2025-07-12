@@ -38,6 +38,11 @@ GLFWwindow* ChevalierEngineStatics::getWindow()
     return ChevalierEngineInstance::getInstance()->mWindow;
 }
 
+VkRenderPass ChevalierEngineStatics::getRenderPass()
+{
+    return ChevalierRenderer::getInstance()->renderPass;
+}
+
 QueueFamilyIndices ChevalierEngineStatics::findQueueFamilies(VkPhysicalDevice device) {
     QueueFamilyIndices indices;
 
@@ -161,6 +166,11 @@ void ChevalierEngineStatics::createImage(uint32_t width, uint32_t height, uint32
     }
 
     vkBindImageMemory(ChevalierEngineStatics::getLogicalDevice(), image, imageMemory, 0);
+}
+
+VkDescriptorSetLayout ChevalierEngineStatics::getDescriptorSetLayout()
+{
+    return ChevalierRenderer::getInstance()->descriptorSetLayout;
 }
 
 std::vector<char> ChevalierEngineStatics::readFile(const std::string& filename)

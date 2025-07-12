@@ -1,6 +1,7 @@
 #include "ChevalierRenderer.h"
 #include "ChevalierEngineStatics.h"
 #include "ChevalierRenderObject.h"
+#include "Materials/ChevalierMaterial.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -17,6 +18,7 @@ ChevalierRenderer::ChevalierRenderer()
 
 void ChevalierRenderer::SetFrameBufferResized(bool value)
 {
+    framebufferResized = value;
 }
 
 void ChevalierRenderer::RegisterRenderObject(ChevalierRenderObject* newObject)
@@ -62,8 +64,6 @@ void ChevalierRenderer::initRenderer()
 
     createDescriptorSetLayout();
 
-    createGraphicsPipeline();
-
     createCommandPool();
 
     createColorResources();
@@ -88,6 +88,12 @@ void ChevalierRenderer::initRenderer()
     //Create the Render Objects
     ChevalierRenderObject* RO2 = new ChevalierRenderObject();
     RegisterRenderObject(RO2);
+
+    MaterialCreateInfo newMaterialInfo{};
+    newMaterialInfo.vertexShaderPath = "";
+    newMaterialInfo.fragmentShaderPath = "";
+
+    materials.push_back(new ChevalierMaterial());
 
 
 }
@@ -121,144 +127,6 @@ void ChevalierRenderer::createDescriptorSetLayout() {
 
 }
 
-VkShaderModule ChevalierRenderer::createShaderModule(const std::vector<char>& code) {
-    VkShaderModuleCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = code.size();
-    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-    VkShaderModule shaderModule;
-    if (vkCreateShaderModule(ChevalierEngineStatics::getLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create shader module!");
-    }
-
-    return shaderModule;
-}
-
-void ChevalierRenderer::createGraphicsPipeline() {
-    auto vertShaderCode = ChevalierEngineStatics::readFile("content/shaders/vert.spv");
-    auto fragShaderCode = ChevalierEngineStatics::readFile("content/shaders/frag.spv");
-
-    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
-
-    VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
-    vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageInfo.module = vertShaderModule;
-    vertShaderStageInfo.pName = "main";
-
-    VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
-    fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = fragShaderModule;
-    fragShaderStageInfo.pName = "main";
-
-    VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
-
-    VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-    vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
-    auto bindingDescription = Vertex::getBindingDescription();
-    auto attributeDescriptions = Vertex::getAttributeDescriptions();
-
-    vertexInputInfo.vertexBindingDescriptionCount = 1;
-    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
-
-    VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
-    inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    inputAssembly.primitiveRestartEnable = VK_FALSE;
-
-    VkPipelineViewportStateCreateInfo viewportState{};
-    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    viewportState.viewportCount = 1;
-    viewportState.scissorCount = 1;
-
-    VkPipelineRasterizationStateCreateInfo rasterizer{};
-    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizer.depthClampEnable = VK_FALSE;
-    rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    rasterizer.depthBiasEnable = VK_FALSE;
-
-    VkPipelineMultisampleStateCreateInfo multisampling{};
-    multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampling.sampleShadingEnable = VK_TRUE;
-    multisampling.minSampleShading = .2f;
-    multisampling.rasterizationSamples = ChevalierEngineStatics::getSamplesCount();
-
-    VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachment.blendEnable = VK_FALSE;
-
-    VkPipelineColorBlendStateCreateInfo colorBlending{};
-    colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlending.logicOpEnable = VK_FALSE;
-    colorBlending.logicOp = VK_LOGIC_OP_COPY;
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
-    colorBlending.blendConstants[0] = 0.0f;
-    colorBlending.blendConstants[1] = 0.0f;
-    colorBlending.blendConstants[2] = 0.0f;
-    colorBlending.blendConstants[3] = 0.0f;
-
-    VkPipelineDepthStencilStateCreateInfo depthCreateInfo{};
-    depthCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthCreateInfo.depthTestEnable = VK_TRUE;
-    depthCreateInfo.depthWriteEnable = VK_TRUE;
-    depthCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
-    depthCreateInfo.depthBoundsTestEnable = VK_FALSE;
-
-
-    std::vector<VkDynamicState> dynamicStates = {
-        VK_DYNAMIC_STATE_VIEWPORT,
-        VK_DYNAMIC_STATE_SCISSOR
-    };
-    VkPipelineDynamicStateCreateInfo dynamicState{};
-    dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
-    dynamicState.pDynamicStates = dynamicStates.data();
-
-    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
-    pipelineLayoutInfo.pushConstantRangeCount = 0;
-
-    if (vkCreatePipelineLayout(ChevalierEngineStatics::getLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create pipeline layout!");
-    }
-
-    VkGraphicsPipelineCreateInfo pipelineInfo{};
-    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = 2;
-    pipelineInfo.pStages = shaderStages;
-    pipelineInfo.pVertexInputState = &vertexInputInfo;
-    pipelineInfo.pInputAssemblyState = &inputAssembly;
-    pipelineInfo.pViewportState = &viewportState;
-    pipelineInfo.pRasterizationState = &rasterizer;
-    pipelineInfo.pMultisampleState = &multisampling;
-    pipelineInfo.pColorBlendState = &colorBlending;
-    pipelineInfo.pDynamicState = &dynamicState;
-    pipelineInfo.pDepthStencilState = &depthCreateInfo;
-    pipelineInfo.layout = pipelineLayout;
-    pipelineInfo.renderPass = renderPass;
-    pipelineInfo.subpass = 0;
-    pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-
-    if (vkCreateGraphicsPipelines(ChevalierEngineStatics::getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create graphics pipeline!");
-    }
-
-    vkDestroyShaderModule(ChevalierEngineStatics::getLogicalDevice(), fragShaderModule, nullptr);
-    vkDestroyShaderModule(ChevalierEngineStatics::getLogicalDevice(), vertShaderModule, nullptr);
-}
 
 void ChevalierRenderer::createRenderPass() {
     VkAttachmentDescription colorAttachment{};
@@ -370,6 +238,7 @@ void ChevalierRenderer::createUniformBuffers() {
 
 }
 
+
 void ChevalierRenderer::createFramebuffers()
 {
     swapchainManager.swapchainFramebuffers.resize(swapchainManager.swapchainImageViews.size());
@@ -402,6 +271,7 @@ void ChevalierRenderer::createFramebuffers()
     }
 }
 
+
 void ChevalierRenderer::createCommandPool()
 {
     QueueFamilyIndices queueFamilyIndices = ChevalierEngineStatics::findQueueFamilies(ChevalierEngineStatics::getPhysicalDevice());
@@ -415,6 +285,7 @@ void ChevalierRenderer::createCommandPool()
         throw std::runtime_error("failed to create command pool!");
     }
 }
+
 
 void ChevalierRenderer::createDescriptorPool() {
     std::array<VkDescriptorPoolSize, 2> poolSizes{};
@@ -436,6 +307,7 @@ void ChevalierRenderer::createDescriptorPool() {
     }
 
 }
+
 
 void ChevalierRenderer::createDescriptorSets() {
 
@@ -489,6 +361,7 @@ void ChevalierRenderer::createDescriptorSets() {
 
 }
 
+
 void ChevalierRenderer::createCommandBuffers()
 {
 	commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
@@ -503,6 +376,7 @@ void ChevalierRenderer::createCommandBuffers()
 		throw std::runtime_error("failed to allocate command buffers!");
 	}
 }
+
 
 void ChevalierRenderer::createSyncObjects()
 {
@@ -525,6 +399,7 @@ void ChevalierRenderer::createSyncObjects()
 		}
 	}
 }
+
 
 void ChevalierRenderer::updateUniformBuffer(uint32_t currentImage) {
     static auto startTime = std::chrono::high_resolution_clock::now();
@@ -549,6 +424,7 @@ void ChevalierRenderer::updateUniformBuffer(uint32_t currentImage) {
 
 
 }
+
 
 void ChevalierRenderer::createTextureImage() {
     int texWidth, texHeight, texChannels;
@@ -585,6 +461,7 @@ void ChevalierRenderer::createTextureImage() {
     vkDestroyBuffer(ChevalierEngineStatics::getLogicalDevice(), stagingBuffer, nullptr);
     vkFreeMemory(ChevalierEngineStatics::getLogicalDevice(), stagingBufferMemory, nullptr);
 }
+
 
 
 
@@ -652,6 +529,7 @@ void ChevalierRenderer::transitionImageLayout(VkImage image, VkFormat format, Vk
     ChevalierEngineStatics::endSingleTimeCommands(commandBuffer);
 }
 
+
 void ChevalierRenderer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
     VkCommandBuffer commandBuffer = ChevalierEngineStatics::beginSingleTimeCommands();
 
@@ -684,6 +562,7 @@ void ChevalierRenderer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32
     ChevalierEngineStatics::endSingleTimeCommands(commandBuffer);
 }
 
+
 void ChevalierRenderer::createTextureImageView() {
     textureImageView = ChevalierEngineStatics::createImageView(
         textureImage,
@@ -692,6 +571,7 @@ void ChevalierRenderer::createTextureImageView() {
         mipLevels
     );
 }
+
 
 void ChevalierRenderer::createTextureSampler() {
     VkSamplerCreateInfo samplerInfo{};
@@ -725,6 +605,7 @@ void ChevalierRenderer::createTextureSampler() {
     }
 }
 
+
 void ChevalierRenderer::createDepthResources() {
     VkFormat depthFormat = findDepthFormat();
 
@@ -752,6 +633,7 @@ void ChevalierRenderer::createDepthResources() {
 
 }
 
+
 VkFormat ChevalierRenderer::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
     for (const auto format : candidates) {
         VkFormatProperties props;
@@ -770,6 +652,7 @@ VkFormat ChevalierRenderer::findSupportedFormat(const std::vector<VkFormat>& can
     throw std::runtime_error("failed to find supported format");
 }
 
+
 VkFormat ChevalierRenderer::findDepthFormat() {
     return findSupportedFormat(
         { VkFormat::VK_FORMAT_D32_SFLOAT, VkFormat::VK_FORMAT_D32_SFLOAT_S8_UINT, VkFormat::VK_FORMAT_D24_UNORM_S8_UINT },
@@ -778,10 +661,10 @@ VkFormat ChevalierRenderer::findDepthFormat() {
     );
 }
 
+
 bool ChevalierRenderer::hasStencilComponent(VkFormat format) {
     return format == VkFormat::VK_FORMAT_D32_SFLOAT_S8_UINT || format == VkFormat::VK_FORMAT_D24_UNORM_S8_UINT;
 }
-
 
 
 void ChevalierRenderer::generateMipmaps(VkImage image, VkFormat imageFormat, uint32_t texWidth, uint32_t texHeight, uint32_t mipLevels) {
@@ -984,12 +867,16 @@ void ChevalierRenderer::cleanup()
         delete renderObject;
     }
 
+    //Cleanup materials
+    for (ChevalierMaterial* material : materials) {
+        delete material;
+    }
+
+
 
     vkDestroyDescriptorPool(device, descriptorPool, nullptr);
     vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 
-    vkDestroyPipeline(device, graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     vkDestroyRenderPass(device, renderPass, nullptr);
 
 
@@ -1118,7 +1005,9 @@ void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+    //std::cout << "Num Materials: " << materials.size() << std::endl;
+
+    materials[0]->bindMaterialProperties(commandBuffer);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -1158,7 +1047,7 @@ void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
         vkCmdBindDescriptorSets(
             commandBuffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipelineLayout,
+            materials[0]->materialPipelineLayout,
             0,
             1,
             &descriptorSets[currentFrame],

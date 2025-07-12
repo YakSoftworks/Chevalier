@@ -5,6 +5,7 @@
 #include "RendererClasses/SwapChainManager.h"
 
 class ChevalierRenderObject;
+class ChevalierMaterial;
 
 
 
@@ -41,8 +42,6 @@ protected:
 	//Creations
 
 	void createDescriptorSetLayout();
-
-	void createGraphicsPipeline();
 
 	void createDescriptorPool();
 	void createDescriptorSets();
@@ -87,6 +86,10 @@ protected:
 	//Render Objects
 	std::vector<ChevalierRenderObject*> renderObjects;
 
+	//Materials/Pipelines
+	std::vector<ChevalierMaterial*> materials;
+
+
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
 
@@ -107,10 +110,7 @@ protected:
 
 	//Not Permanent
 	VkRenderPass renderPass;
-	VkPipelineLayout pipelineLayout;
-	VkPipeline graphicsPipeline;
 
-	VkShaderModule createShaderModule(const std::vector<char>& code);
 
 	//Chaos
 	void updateUniformBuffer(uint32_t currentImage);
