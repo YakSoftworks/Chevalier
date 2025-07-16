@@ -137,6 +137,7 @@
     <ClCompile Include="src\Chevalier\ChevalierEngineStatics.cpp" />
     <ClCompile Include="src\Chevalier\ChevalierRenderer.cpp" />
     <ClCompile Include="src\Chevalier\ChevalierRenderObject.cpp" />
+    <ClCompile Include="src\Chevalier\Materials\MaterialDescriptors.cpp" />
     <ClCompile Include="src\Chevalier\RendererClasses\SwapChainManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +148,7 @@
     <ClInclude Include="src\Chevalier\ChevalierRenderer.h" />
     <ClInclude Include="src\Chevalier\ChevalierRenderObject.h" />
     <ClInclude Include="src\Chevalier\ChevalierTypes.h" />
+    <ClInclude Include="src\Chevalier\Materials\MaterialDescriptors.h" />
     <ClInclude Include="src\Chevalier\RendererClasses\SwapChainManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

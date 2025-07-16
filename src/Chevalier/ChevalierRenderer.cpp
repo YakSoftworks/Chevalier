@@ -123,7 +123,7 @@ void ChevalierRenderer::createDescriptorSetLayout() {
     if (vkCreateDescriptorSetLayout(ChevalierEngineStatics::getLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor set layout!");
     }
-
+    
 
 }
 

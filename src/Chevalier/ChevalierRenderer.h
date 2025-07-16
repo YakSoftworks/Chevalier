@@ -44,7 +44,9 @@ protected:
 	void createDescriptorSetLayout();
 
 	void createDescriptorPool();
+
 	void createDescriptorSets();
+
 	void createCommandBuffers();
 	void createSyncObjects();
 	void createUniformBuffers();
@@ -60,9 +62,6 @@ protected:
 
 	//Swap Chain + properties
 	SwapChainManager swapchainManager;
-
-
-
 
 	//Sync Objects
 	std::vector<VkSemaphore> imageAvailableSemaphores;
