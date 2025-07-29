@@ -52,8 +52,6 @@ public:
 		VkImage& image, 
 		VkDeviceMemory& imageMemory);
 
-	static VkDescriptorSetLayout getDescriptorSetLayout();
-
 };
 
 

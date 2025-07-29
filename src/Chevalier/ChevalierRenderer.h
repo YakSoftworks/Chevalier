@@ -6,7 +6,7 @@
 
 class ChevalierRenderObject;
 class ChevalierMaterial;
-
+struct GlobalDescriptorDataManager;
 
 
 class ChevalierRenderer
@@ -41,15 +41,10 @@ protected:
 
 	//Creations
 
-	void createDescriptorSetLayout();
-
 	void createDescriptorPool();
-
-	void createDescriptorSets();
 
 	void createCommandBuffers();
 	void createSyncObjects();
-	void createUniformBuffers();
 
 	void createFramebuffers();
 	void createCommandPool();
@@ -92,9 +87,10 @@ protected:
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
 
-	VkDescriptorSetLayout descriptorSetLayout;
 	VkDescriptorPool descriptorPool;
-	std::vector<VkDescriptorSet> descriptorSets;
+
+	GlobalDescriptorDataManager* globalDataManager;
+	
 
 	uint32_t mipLevels;
 	VkImage textureImage;
@@ -102,10 +98,6 @@ protected:
 
 	VkImageView textureImageView;
 	VkSampler textureSampler;
-
-	std::vector<VkBuffer> uniformBuffers;
-	std::vector<VkDeviceMemory> unformBuffersMemory;
-	std::vector<void*> uniformBuffersMapped;
 
 	//Not Permanent
 	VkRenderPass renderPass;
@@ -160,12 +152,6 @@ protected:
 	void drawFrame();
 
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-
-	
-
-
-
-
 
 
 };

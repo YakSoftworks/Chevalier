@@ -104,6 +104,14 @@ void ChevalierMaterial::bindMaterialProperties(VkCommandBuffer commandBuffer)
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         materialPipeline);
 
+    vkCmdBindDescriptorSets(commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        materialPipelineLayout,
+        0, 1,
+        materialDescriptorSet.materialSets.data(),
+        0,
+        0);
+
     //std::cout << materialPipeline << std::endl;
 }
 
@@ -111,6 +119,8 @@ void ChevalierMaterial::cleanupMaterial()
 {
 
     VkDevice device = ChevalierEngineStatics::getLogicalDevice();
+
+    materialDescriptorSet.cleanupDescriptorSet();
 
     vkDestroyPipeline(device, materialPipeline, nullptr);
     vkDestroyPipelineLayout(device, materialPipelineLayout, nullptr);
@@ -140,12 +150,31 @@ VkShaderModule ChevalierMaterial::createShaderModule(const std::vector<char>& co
 
 ChevalierMaterial::ChevalierMaterial()
 {
+    //create Descriptor Sets
+    initDescriptorSets();
+
+
+    //Create Pipeline
     create_pipeline(ChevalierEngineStatics::getLogicalDevice(), ChevalierEngineStatics::getRenderPass());
+
+    materialDescriptorSet.createSets();
+}
+
+void ChevalierMaterial::initDescriptorSets()
+{
+    VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+    samplerLayoutBinding.binding = 2;
+    samplerLayoutBinding.descriptorCount = 1;
+    samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    samplerLayoutBinding.pImmutableSamplers = nullptr;
+    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    materialDescriptorSet.createLayout(&samplerLayoutBinding, nullptr);
 }
 
 void ChevalierMaterial::create_pipeline(VkDevice device, VkRenderPass renderPass)
 {
-    auto vertShaderCode = ChevalierEngineStatics::readFile("content/shaders/vert.spv");
+    auto vertShaderCode = ChevalierEngineStatics::readFile("content/shaders/AdvancedVert.spv");
     auto fragShaderCode = ChevalierEngineStatics::readFile("content/shaders/frag.spv");
 
     VkShaderModule vertShaderModule = ChevalierMaterial::createShaderModule(vertShaderCode);
@@ -237,7 +266,7 @@ void ChevalierMaterial::create_pipeline(VkDevice device, VkRenderPass renderPass
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
-    VkDescriptorSetLayout descriptorSetLayout = ChevalierEngineStatics::getDescriptorSetLayout();
+    VkDescriptorSetLayout descriptorSetLayout = materialDescriptorSet.materialSetLayout;
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
     pipelineLayoutInfo.pushConstantRangeCount = 0;
 
@@ -262,7 +291,8 @@ void ChevalierMaterial::create_pipeline(VkDevice device, VkRenderPass renderPass
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-    if (vkCreateGraphicsPipelines(ChevalierEngineStatics::getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &materialPipeline) != VK_SUCCESS) {
+    VkResult result = vkCreateGraphicsPipelines(ChevalierEngineStatics::getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &materialPipeline);
+    if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 

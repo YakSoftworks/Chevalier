@@ -33,6 +33,13 @@ struct SwapChainSupportDetails {
     std::vector<VkPresentModeKHR> presentModes;
 };
 
+struct AllocatedBuffer {
+    
+    VkBuffer Buffer;
+    VkDeviceMemory BufferMemory;
+
+};
+
 
 //Vertex Data
 struct Vertex {
@@ -76,6 +83,14 @@ struct Vertex {
 
 
 };
+
+
+struct PerObjectData {
+
+    glm::mat4 modelMat;
+
+};
+
 
 namespace std {
     template<> struct hash<Vertex> {

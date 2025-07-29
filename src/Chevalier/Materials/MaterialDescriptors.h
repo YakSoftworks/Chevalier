@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ChevalierCore.h"
-#include "ChevalierEngineStatics.h"
+
 
 
 // Container for descriptor layouts and sets for a material
@@ -24,18 +24,21 @@ struct MaterialDescriptorSetBase {
 
 	virtual void createSets();
 
+	void cleanupDescriptorSet();
+
+	~MaterialDescriptorSetBase();
+
 };
 
 //Set with Binding 0 being GlobalShadingData
 struct MaterialDescriptorSet : public MaterialDescriptorSetBase {
 
 	virtual void createLayout(
-		VkDescriptorSetLayoutBinding* binding1,
 		VkDescriptorSetLayoutBinding* binding2,
 		VkDescriptorSetLayoutBinding* binding3
 	);
 
-	virtual void createSets() override;
+	~MaterialDescriptorSet();
 
 };
 
@@ -60,6 +63,13 @@ struct GlobalDescriptorDataManager {
 	~GlobalDescriptorDataManager();
 
 	static GlobalDescriptorDataManager* instance;
+
+	void createObjectBuffers();
+	void cleanupObjectBuffers();
+
+	//Set of buffers - One per FRAME_IN_FLIGHT
+	std::vector<AllocatedBuffer> objectBuffers;
+	std::vector<void*> objectBufferMappedMemory;
 
 };
 

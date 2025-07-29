@@ -12,11 +12,11 @@ ChevalierRenderObject::ChevalierRenderObject()
 
     if (ChevalierRenderObject::count % 2 == 0) {
         modelFilepath = "content/models/VikingRoom/viking_room.obj";
-        objectTransform = glm::translate(objectTransform, glm::vec3(0.0f, 0, 2.0f * ChevalierRenderObject::count));
+        objectTransform = glm::translate(objectTransform, glm::vec3(0.0f, 0, 2.0f * (1.f + ChevalierRenderObject::count)));
     }
     else {
         modelFilepath = "content/models/monkey.obj";
-        objectTransform = glm::translate(objectTransform, glm::vec3(0.0f, 0, 2.0f * ChevalierRenderObject::count));
+        objectTransform = glm::translate(objectTransform, glm::vec3(0.0f, 0, 10.0f * (ChevalierRenderObject::count + 1.f)));
     }
     
     count++;

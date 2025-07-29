@@ -1,6 +1,8 @@
 #pragma once
 #include "ChevalierCore.h"
 
+#include "MaterialDescriptors.h"
+
 namespace PipelineInitializers {
 	VkPipelineShaderStageCreateInfo pipeline_shader_stage_create_info(VkShaderStageFlagBits stage, VkShaderModule shaderModule);
 	VkPipelineVertexInputStateCreateInfo vertex_input_state_create_info();
@@ -62,7 +64,13 @@ public:
 
 	~ChevalierMaterial();
 
+
+	MaterialDescriptorSet materialDescriptorSet;
+
 protected:
+
+	void initDescriptorSets();
+
 	void create_pipeline(VkDevice device, VkRenderPass renderPass);
 
 	static VkShaderModule createShaderModule(const std::vector<char>& code);

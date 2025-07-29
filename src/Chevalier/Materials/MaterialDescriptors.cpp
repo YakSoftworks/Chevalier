@@ -1,7 +1,10 @@
 #include "MaterialDescriptors.h"
-
+#include "ChevalierEngineStatics.h"
 
 #pragma region GlobalDescriptorDataManager
+
+GlobalDescriptorDataManager* GlobalDescriptorDataManager::instance = nullptr;
+
 
 GlobalDescriptorDataManager::GlobalDescriptorDataManager()
 {
@@ -42,13 +45,28 @@ GlobalDescriptorDataManager::GlobalDescriptorDataManager()
 			&globalDataMappedMemory[i]
 		);
 
+		GlobalShadingData* mData = static_cast<GlobalShadingData*>(globalDataMappedMemory[i]);
+		
 
+			mData->viewMat = glm::lookAt(glm::vec3(10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
+			int width, height = 0;
+
+			ChevalierEngineStatics::getWindowFrameBufferExtent(&width, &height);
+
+			mData->projMat = glm::perspective(
+				glm::radians(45.f),
+				(float) width / (float)height,
+				0.1f,
+				10.f);
 	}
+
+	createObjectBuffers();
 
 	//Mark this as our instance for ease of access
 	instance = this;
 
+	std::cout << "Global Descriptor Setup Complete " << std::endl;
 	
 }
 
@@ -61,15 +79,60 @@ GlobalDescriptorDataManager::~GlobalDescriptorDataManager()
 		vkDestroyBuffer(device, globalDataBuffers[i], nullptr);
 
 		//Free Memory
-		vkFreeMemory(device, globalDataBufferMemory[i], false);
+		vkFreeMemory(device, globalDataBufferMemory[i], nullptr);
 
 	}
+
+	cleanupObjectBuffers();
 
 
 }
 
+void GlobalDescriptorDataManager::createObjectBuffers()
+{
+
+	objectBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+	objectBufferMappedMemory.resize(MAX_FRAMES_IN_FLIGHT);
+
+	VkDeviceSize bufferSize = sizeof(PerObjectData) * MAX_OBJECTS;
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+
+		ChevalierEngineStatics::createBuffer(
+			bufferSize,
+			VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			objectBuffers[i].Buffer,
+			objectBuffers[i].BufferMemory
+		);
+
+		vkMapMemory(ChevalierEngineStatics::getLogicalDevice(),
+			objectBuffers[i].BufferMemory,
+			0,
+			bufferSize,
+			0,
+			&objectBufferMappedMemory[i]);
+
+
+	}
+}
+
+void GlobalDescriptorDataManager::cleanupObjectBuffers()
+{
+	VkDevice device = ChevalierEngineStatics::getLogicalDevice();
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+
+		//Cleanup each buffer
+		vkDestroyBuffer(device, objectBuffers[i].Buffer, nullptr);
+		vkFreeMemory(device, objectBuffers[i].BufferMemory, nullptr);
+
+	}
+}
+
 #pragma endregion
+
 #pragma region MaterialSetBase
+
 void MaterialDescriptorSetBase::createLayout(VkDescriptorSetLayoutBinding* binding0, VkDescriptorSetLayoutBinding* binding1, VkDescriptorSetLayoutBinding* binding2, VkDescriptorSetLayoutBinding* binding3)
 {
 	//create an array for each possible binding
@@ -94,7 +157,7 @@ void MaterialDescriptorSetBase::createLayout(VkDescriptorSetLayoutBinding* bindi
 
 	
 	if (binding1) {
-		bindings[numBindings] = *binding0;
+		bindings[numBindings] = *binding1;
 		//Ensure binding value
 		bindings[numBindings].binding = 1;
 
@@ -103,7 +166,7 @@ void MaterialDescriptorSetBase::createLayout(VkDescriptorSetLayoutBinding* bindi
 
 	//For each binding
 	if (binding2) {
-		bindings[numBindings] = *binding0;
+		bindings[numBindings] = *binding2;
 		//Ensure binding value
 		bindings[numBindings].binding = 2;
 
@@ -112,7 +175,7 @@ void MaterialDescriptorSetBase::createLayout(VkDescriptorSetLayoutBinding* bindi
 
 	//For each binding
 	if (binding3) {
-		bindings[numBindings] = *binding0;
+		bindings[numBindings] = *binding3;
 
 		//Ensure binding value
 		bindings[numBindings].binding = 3;
@@ -129,13 +192,89 @@ void MaterialDescriptorSetBase::createLayout(VkDescriptorSetLayoutBinding* bindi
 		throw std::runtime_error("failed to create descriptor set layout!");
 	}
 
+}
 
+void MaterialDescriptorSetBase::createSets()
+{
+
+	std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, materialSetLayout);
+
+	//Create our alloc info
+	VkDescriptorSetAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.descriptorPool = ChevalierEngineStatics::getDescriptorPool();
+	allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+	allocInfo.pSetLayouts = layouts.data();
+
+	//Prepare our list
+	materialSets.resize(MAX_FRAMES_IN_FLIGHT);
+	
+	//Allocate the sets
+	if (vkAllocateDescriptorSets(ChevalierEngineStatics::getLogicalDevice(), &allocInfo, materialSets.data()) != VK_SUCCESS) {
+		throw std::runtime_error("failed to allocate descriptor sets!");
+	}
+
+	//Setup the sets - THIS INSTANCE ONLY
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		VkDescriptorBufferInfo globalInfo{};
+		globalInfo.buffer = GlobalDescriptorDataManager::instance->globalDataBuffers[i];
+		globalInfo.offset = 0;
+		globalInfo.range = sizeof(GlobalShadingData);
+
+		VkDescriptorBufferInfo objectInfo{};
+		objectInfo.buffer = GlobalDescriptorDataManager::instance->objectBuffers[i].Buffer;
+		objectInfo.offset = 0;
+		objectInfo.range = sizeof(PerObjectData);
+
+
+		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+
+		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[0].dstSet = materialSets[i];
+		descriptorWrites[0].dstBinding = 0;
+		descriptorWrites[0].dstArrayElement = 0;
+		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorWrites[0].descriptorCount = 1;
+		descriptorWrites[0].pBufferInfo = &globalInfo;
+
+		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[1].dstSet = materialSets[i];
+		descriptorWrites[1].dstBinding = 1;
+		descriptorWrites[1].dstArrayElement = 0;
+		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		descriptorWrites[1].descriptorCount = 1;
+		descriptorWrites[1].pBufferInfo = &objectInfo;
+
+		vkUpdateDescriptorSets(
+			ChevalierEngineStatics::getLogicalDevice(),
+			static_cast<uint32_t>(descriptorWrites.size()),
+			descriptorWrites.data(),
+			0,
+			nullptr);
+	}
+
+}
+
+void MaterialDescriptorSetBase::cleanupDescriptorSet()
+{
+
+	vkDestroyDescriptorSetLayout(
+		ChevalierEngineStatics::getLogicalDevice(),
+		materialSetLayout,
+		nullptr);
+}
+
+MaterialDescriptorSetBase::~MaterialDescriptorSetBase()
+{
+	//cleanup set layout
+	cleanupDescriptorSet();
 }
 
 #pragma endregion
 #pragma region MaterialSet
 
-void MaterialDescriptorSet::createLayout(VkDescriptorSetLayoutBinding* binding1, VkDescriptorSetLayoutBinding* binding2, VkDescriptorSetLayoutBinding* binding3)
+void MaterialDescriptorSet::createLayout(VkDescriptorSetLayoutBinding* binding2, VkDescriptorSetLayoutBinding* binding3)
 {
 	//Make Binding 0 - Global Shader Data
 	VkDescriptorSetLayoutBinding globalDataBinding{};
@@ -151,13 +290,28 @@ void MaterialDescriptorSet::createLayout(VkDescriptorSetLayoutBinding* binding1,
 
 	globalDataBinding.pImmutableSamplers = nullptr;
 
+
+	VkDescriptorSetLayoutBinding objectDataBinding{};
+	objectDataBinding.binding = 1;
+	objectDataBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	objectDataBinding.pImmutableSamplers = nullptr;
+	objectDataBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	objectDataBinding.descriptorCount = 1;
+
+
 	//Pass to original function now using four bindings
 	MaterialDescriptorSetBase::createLayout(
 		&globalDataBinding,
-		binding1,
+		&objectDataBinding,
 		binding2,
 		binding3);
 
+}
+
+MaterialDescriptorSet::~MaterialDescriptorSet()
+{
+	//call for cleanup
+	cleanupDescriptorSet();
 }
 
 

@@ -169,6 +169,12 @@ void ChevalierEngineInstance::createLogicalDevice()
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceFeatures.samplerAnisotropy = VK_TRUE;
     deviceFeatures.sampleRateShading = VK_TRUE;
+    
+    VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParamsFeature{};
+    shaderDrawParamsFeature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES;
+    shaderDrawParamsFeature.pNext = nullptr;
+    shaderDrawParamsFeature.shaderDrawParameters = VK_TRUE;
+
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -180,6 +186,8 @@ void ChevalierEngineInstance::createLogicalDevice()
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+    
+    createInfo.pNext = &shaderDrawParamsFeature;
 
     if (vkCreateDevice(vPhysicalDevice, &createInfo, nullptr, &vDevice) != VK_SUCCESS) {
         throw std::runtime_error("failed to create logical device!");
