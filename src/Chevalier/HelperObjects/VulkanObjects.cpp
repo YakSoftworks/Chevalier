@@ -724,3 +724,184 @@ void VulkanCommandBuffers::CreateCommandBuffers()
     }
 
 }
+
+VkCommandBuffer VulkanCommandBuffers::beginSingleTimeCommands()
+{
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = VulkanCommandPool::getCommandPool();
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer commandBuffer;
+    vkAllocateCommandBuffers(VulkanLogicalDevice::getLogicalDevice(), &allocInfo, &commandBuffer);
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    return commandBuffer;
+}
+
+void VulkanCommandBuffers::endSingleTimeCommands(VkCommandBuffer buffer)
+{
+    vkEndCommandBuffer(buffer);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &buffer;
+
+    vkQueueSubmit(VulkanLogicalDevice::getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(VulkanLogicalDevice::getGraphicsQueue());
+
+    vkFreeCommandBuffers(VulkanLogicalDevice::getLogicalDevice(), VulkanCommandPool::getCommandPool(), 1, &buffer);
+}
+
+void VulkanImage::createImage(const ImageCreationInfo& info, VkImage& image, VkDeviceMemory& imageMemory)
+{
+    VkImageCreateInfo imageInfo{};
+
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.extent.width = info.width;
+    imageInfo.extent.height = info.height;
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = info.mipLevel;
+    imageInfo.arrayLayers = 1;
+    imageInfo.format = info.format;
+    imageInfo.tiling = info.tiling;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageInfo.usage = info.usage;
+    imageInfo.samples = MSAAResources::getMSAASampleCount();
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateImage(VulkanLogicalDevice::getLogicalDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS) {
+        CHEV_MESSAGE_ERROR(" Failed to create Vulkan Image ");
+    }
+
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements(VulkanLogicalDevice::getLogicalDevice(), image, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, info.properties);
+
+    if (vkAllocateMemory(VulkanLogicalDevice::getLogicalDevice(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
+        CHEV_MESSAGE_ERROR(" Failed to allocate Image memory ");
+    }
+
+    vkBindImageMemory(VulkanLogicalDevice::getLogicalDevice(), image, imageMemory, 0);
+
+
+}
+
+VkImageView VulkanImage::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevel)
+{
+    VkImageViewCreateInfo info{};
+
+    info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    info.image = image;
+    info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    info.format = format;
+    info.subresourceRange.aspectMask = aspectFlags;
+    info.subresourceRange.baseMipLevel = 0;
+    info.subresourceRange.levelCount = mipLevel;
+    info.subresourceRange.baseArrayLayer = 0;
+    info.subresourceRange.layerCount = 1;
+
+    VkImageView newImageView;
+
+    if (vkCreateImageView(VulkanLogicalDevice::getLogicalDevice(), &info, nullptr, &newImageView) != VK_SUCCESS)
+    {
+        CHEV_MESSAGE_ERROR(" Failed to create Image View ");
+    }
+
+    return newImageView;
+
+}
+
+void VulkanImage::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t mipLevel)
+{
+    VkCommandBuffer commandBuffer = VulkanCommandBuffers::beginSingleTimeCommands();
+
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = oldLayout;
+    barrier.newLayout = newLayout;
+
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+    barrier.image = image;
+    //barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT | VK_IMAGE_ASPECT_DEPTH_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+
+    if (mipLevel == 0) {
+        throw std::runtime_error("caught mip error in transition image layout");
+    }
+
+    barrier.subresourceRange.levelCount = mipLevel;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+
+    barrier.srcAccessMask = 0;
+    barrier.dstAccessMask = 0;
+
+    barrier.subresourceRange.aspectMask = aspectMask;
+
+    VkPipelineStageFlags sourceStage;
+    VkPipelineStageFlags destinationStage;
+
+    if (oldLayout == VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+        barrier.srcAccessMask = {};
+        barrier.dstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+
+        sourceStage = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        destinationStage = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
+    else if (oldLayout == VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+        barrier.srcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT;
+
+        sourceStage = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    }
+    else {
+        throw std::invalid_argument("unsupported layout transition!");
+    }
+
+
+    vkCmdPipelineBarrier(
+        commandBuffer,
+        sourceStage, destinationStage,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &barrier
+
+    );
+
+
+    VulkanCommandBuffers::endSingleTimeCommands(commandBuffer);
+}
+
+uint32_t VulkanImage::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(VulkanPhysicalDevice::getPhysicalDevice(), &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+
+    CHEV_MESSAGE_ERROR(" Failed to find Memory Type ");
+
+
+}
+

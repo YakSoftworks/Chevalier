@@ -4,7 +4,6 @@
 
 class ChevalierMaterialInterface {
 
-
 	// Add Material Properties to our given Command Buffer
 	virtual void BindMaterial(VkCommandBuffer* buffer) { /* No nothing */ };
 

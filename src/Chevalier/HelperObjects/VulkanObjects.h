@@ -129,6 +129,8 @@ public:
 
 	static VkDevice getLogicalDevice();
 
+	static VkQueue getGraphicsQueue() { return graphicsQueue; }
+
 	static void cleanup();
 
 };
@@ -236,5 +238,35 @@ protected:
 public:
 
 	void CreateCommandBuffers();
+
+	static VkCommandBuffer beginSingleTimeCommands();
+	static void endSingleTimeCommands(VkCommandBuffer buffer);
+
+};
+
+struct ImageCreationInfo {
+
+	uint32_t width;
+	uint32_t height;
+	uint32_t mipLevel;
+	VkSampleCountFlagBits numSamples;
+	VkFormat format;
+	VkImageTiling tiling;
+	VkImageUsageFlags usage;
+	VkMemoryPropertyFlags properties;
+
+};
+
+struct VulkanImage {
+
+	static void createImage(const ImageCreationInfo& info, VkImage& image, VkDeviceMemory& imageMemory);
+
+	static VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevel);
+
+	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t mipLevel);
+
+protected:
+
+	static uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 };

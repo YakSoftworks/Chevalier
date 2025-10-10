@@ -2,6 +2,8 @@
 
 #include "ChevalierGraphicsCore.h"
 
+#include "HelperObjects/ChevalierObjects.h"
+
 class ChevalierRenderer {
 
 public:
@@ -15,13 +17,20 @@ public:
 
 protected:
 
+	void drawFrame();
+
+	void recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex);
+
+protected:
+
 	//Owned Objects
 
 	VulkanRenderPass mRenderPass;
 
 	VulkanCommandBuffers mCommandBuffers; 
 	
-	//TODO: DEPTH RESOURCES
+	//DEPTH RESOURCES
+	DepthResources mDepthResources;
 
 	//TODO: COLOR RESOURCES
 

@@ -42,6 +42,8 @@ void ChevalierInstance::LoopProgram()
 	while (!CheckShouldClose()) {
 		mRenderer.LoopRenderer();
 	}
+
+	vkDeviceWaitIdle(VulkanLogicalDevice::getLogicalDevice());
 }
 
 bool ChevalierInstance::CheckShouldClose()
