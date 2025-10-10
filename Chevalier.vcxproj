@@ -132,24 +132,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Chevalier.cpp" />
-    <ClCompile Include="src\Chevalier\Materials\ChevalierMaterial.cpp" />
-    <ClCompile Include="src\Chevalier\ChevalierEngineInstance.cpp" />
-    <ClCompile Include="src\Chevalier\ChevalierEngineStatics.cpp" />
+    <ClCompile Include="src\Chevalier\ChevalierInstance.cpp" />
     <ClCompile Include="src\Chevalier\ChevalierRenderer.cpp" />
-    <ClCompile Include="src\Chevalier\ChevalierRenderObject.cpp" />
-    <ClCompile Include="src\Chevalier\Materials\MaterialDescriptors.cpp" />
-    <ClCompile Include="src\Chevalier\RendererClasses\SwapChainManager.cpp" />
+    <ClCompile Include="src\Chevalier\HelperObjects\ChevalierObjects.cpp" />
+    <ClCompile Include="src\Chevalier\HelperObjects\VulkanObjects.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Chevalier\Materials\ChevalierMaterial.h" />
-    <ClInclude Include="src\Chevalier\ChevalierCore.h" />
-    <ClInclude Include="src\Chevalier\ChevalierEngineInstance.h" />
-    <ClInclude Include="src\Chevalier\ChevalierEngineStatics.h" />
+    <ClInclude Include="src\Chevalier\ChevalierConsole.h" />
+    <ClInclude Include="src\Chevalier\ChevalierConstants.h" />
+    <ClInclude Include="src\Chevalier\ChevalierGraphicsCore.h" />
+    <ClInclude Include="src\Chevalier\ChevalierInstance.h" />
+    <ClInclude Include="src\Chevalier\ChevalierInterfaces.h" />
     <ClInclude Include="src\Chevalier\ChevalierRenderer.h" />
-    <ClInclude Include="src\Chevalier\ChevalierRenderObject.h" />
-    <ClInclude Include="src\Chevalier\ChevalierTypes.h" />
-    <ClInclude Include="src\Chevalier\Materials\MaterialDescriptors.h" />
-    <ClInclude Include="src\Chevalier\RendererClasses\SwapChainManager.h" />
+    <ClInclude Include="src\Chevalier\Core.h" />
+    <ClInclude Include="src\Chevalier\HelperObjects\ChevalierObjects.h" />
+    <ClInclude Include="src\Chevalier\HelperObjects\VulkanObjects.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -18,54 +18,45 @@
     <ClCompile Include="Chevalier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Chevalier\ChevalierEngineInstance.cpp">
+    <ClCompile Include="src\Chevalier\ChevalierInstance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Chevalier\ChevalierEngineStatics.cpp">
+    <ClCompile Include="src\Chevalier\HelperObjects\VulkanObjects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Chevalier\HelperObjects\ChevalierObjects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Chevalier\ChevalierRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Chevalier\ChevalierRenderObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Chevalier\RendererClasses\SwapChainManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Chevalier\Materials\ChevalierMaterial.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Chevalier\Materials\MaterialDescriptors.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Chevalier\ChevalierCore.h">
+    <ClInclude Include="src\Chevalier\ChevalierInstance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Chevalier\ChevalierEngineInstance.h">
+    <ClInclude Include="src\Chevalier\Core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Chevalier\ChevalierEngineStatics.h">
+    <ClInclude Include="src\Chevalier\HelperObjects\VulkanObjects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chevalier\ChevalierConstants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chevalier\ChevalierConsole.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chevalier\ChevalierGraphicsCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chevalier\HelperObjects\ChevalierObjects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Chevalier\ChevalierRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Chevalier\ChevalierRenderObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Chevalier\ChevalierTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Chevalier\RendererClasses\SwapChainManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Chevalier\Materials\ChevalierMaterial.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Chevalier\Materials\MaterialDescriptors.h">
+    <ClInclude Include="src\Chevalier\ChevalierInterfaces.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
