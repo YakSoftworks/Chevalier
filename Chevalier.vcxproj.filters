@@ -30,6 +30,9 @@
     <ClCompile Include="src\Chevalier\ChevalierRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Chevalier\Objects\Materials\ChevalierMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Chevalier\ChevalierInstance.h">
@@ -78,6 +81,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Chevalier\Objects\Components\Component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chevalier\Objects\Materials\ChevalierMaterial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

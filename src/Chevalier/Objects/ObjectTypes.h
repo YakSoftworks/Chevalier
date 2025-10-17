@@ -2,6 +2,8 @@
 
 #include "Core.h"
 
+#include "glm/gtc/matrix_transform.hpp"
+
 
 struct ModelTransform{
 
@@ -14,6 +16,13 @@ struct ModelTransform{
 
         //TODO: Return Transform's Model Matrix
 
+        /*glm::mat4 transform(1.0f);
+
+        glm::translate(transform, position);
+
+
+        glm::scale(transform, scale);*/
+
     }
 
 };
@@ -23,5 +32,24 @@ struct RenderAttributes {
     
 //Struct containing attributes for rendering an object
     bool bRender = true;
+
+};
+
+
+struct GlobalDataObject {
+
+
+
+};
+
+struct ObjectShaderData {
+
+
+
+};
+
+struct LightShaderData {
+
+
 
 };

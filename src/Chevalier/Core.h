@@ -2,7 +2,9 @@
 
 //STL Includes
 #include <iostream>
+#include <fstream>
 
+#include <string>
 
 #include <vector>
 #include <array>
@@ -21,4 +23,3 @@
 //Chevalier Includes
 #include "ChevalierConstants.h"
 #include "ChevalierConsole.h"
-

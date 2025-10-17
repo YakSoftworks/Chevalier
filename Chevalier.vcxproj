@@ -136,6 +136,7 @@
     <ClCompile Include="src\Chevalier\ChevalierRenderer.cpp" />
     <ClCompile Include="src\Chevalier\HelperObjects\ChevalierObjects.cpp" />
     <ClCompile Include="src\Chevalier\HelperObjects\VulkanObjects.cpp" />
+    <ClCompile Include="src\Chevalier\Objects\Materials\ChevalierMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Chevalier\ChevalierConsole.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="src\Chevalier\Objects\Components\Component.h" />
     <ClInclude Include="src\Chevalier\Objects\Components\MeshComponent.h" />
     <ClInclude Include="src\Chevalier\Objects\Map.h" />
+    <ClInclude Include="src\Chevalier\Objects\Materials\ChevalierMaterial.h" />
     <ClInclude Include="src\Chevalier\Objects\ObjectTypes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

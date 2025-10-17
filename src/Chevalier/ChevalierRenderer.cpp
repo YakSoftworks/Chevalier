@@ -1,5 +1,7 @@
 #include "ChevalierRenderer.h"
 
+#include "Objects/Materials/ChevalierMaterial.h"
+
 void ChevalierRenderer::InitRenderer()
 {
 	// SwapChains
@@ -33,7 +35,12 @@ void ChevalierRenderer::InitRenderer()
 	// SyncObjects
 	SyncObjects::createSyncObjects();
 
+    //Init our global shader data
+    ChevalierMaterial::sGlobalDataManager.init();
+
 	// Materials
+
+
 
 	// Models
 }

@@ -275,8 +275,13 @@ struct VulkanImage {
 
 	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t mipLevel);
 
-protected:
-
 	static uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+};
+
+struct VulkanBuffer {
+
+	static VkBuffer createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+
 
 };
