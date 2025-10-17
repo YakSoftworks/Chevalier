@@ -8,6 +8,7 @@ std::vector<VkSemaphore> SyncObjects::renderFinishedSemaphore = {};
 std::vector<VkFence> SyncObjects::inFlightFences = {};
 uint32_t SyncObjects::currentFrameIndex = 0;
 
+#pragma region DepthResources
 
 void DepthResources::CreateDepthResources(uint32_t width, uint32_t height)
 {
@@ -38,6 +39,13 @@ void DepthResources::CreateDepthResources(uint32_t width, uint32_t height)
 
 }
 
+void DepthResources::cleanup() {
+    VkDevice device = VulkanLogicalDevice::getLogicalDevice();
+    vkDestroyImageView(device, depthImageView, nullptr);
+    vkDestroyImage(device, depthImage, nullptr);
+    vkFreeMemory(device, depthImageMemory, nullptr);
+}
+
 VkFormat DepthResources::findDepthFormat()
 {
     return VulkanImageFormat::getSupportedFormat(
@@ -46,6 +54,40 @@ VkFormat DepthResources::findDepthFormat()
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
     );
 }
+
+#pragma endregion
+
+#pragma region ColorResources
+
+void ColorResources::CreateColorResources(uint32_t width, uint32_t height){
+    VkFormat colorFormat = SwapChainManager::getSwapchainImageFormat();
+
+    ImageCreationInfo colorImageInfo{};
+    colorImageInfo.width = width;
+    colorImageInfo.height = height;
+    colorImageInfo.format = colorFormat;
+    colorImageInfo.mipLevel = 1;
+    colorImageInfo.numSamples = MSAAResources::getMSAASampleCount();
+    colorImageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    colorImageInfo.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    colorImageInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    
+    VulkanImage::createImage(colorImageInfo, colorImage, colorImageMemory);
+
+    VulkanImageView::CreateImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+
+}
+
+void ColorResources::cleanup(){
+    VkDevice device = VulkanLogicalDevice::getLogicalDevice();
+    vkDestroyImage(device, colorImage, nullptr);
+    vkDestroyImageView(device, colorImageView, nullptr);
+    vkFreeMemory(device, colorImageMemory, nullptr);
+}
+
+#pragma endregion
+
+#pragma region SyncObjects
 
 void SyncObjects::createSyncObjects()
 {
@@ -72,6 +114,10 @@ void SyncObjects::createSyncObjects()
 
 
 }
+
+#pragma endregion
+
+#pragma region ChevFrameBuffers
 
 void ChevFramebuffer::InitFramebuffers(VkImageView colorImageView, VkImageView depthImageView, VkRenderPass renderPass)
 {
@@ -100,3 +146,5 @@ void ChevFramebuffer::InitFramebuffers(VkImageView colorImageView, VkImageView d
 
     }
 }
+
+#pragma endregion

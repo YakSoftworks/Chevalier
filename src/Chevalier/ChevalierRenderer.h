@@ -4,6 +4,9 @@
 
 #include "HelperObjects/ChevalierObjects.h"
 
+#include "Objects/Map.h"
+#include "ChevalierInterfaces.h"
+
 class ChevalierRenderer {
 
 public:
@@ -29,10 +32,31 @@ protected:
 
 	VulkanCommandBuffers mCommandBuffers; 
 	
-	//DEPTH RESOURCES
+	// DEPTH RESOURCES
 	DepthResources mDepthResources;
 
 	//TODO: COLOR RESOURCES
+	ColorResources mColorResources;
+
+
+	// Current Map Reference
+	Map* CurrentMap;
+
+	// Current Drawobjects
+	std::vector<ChevalierRenderObjectInterface*> RenderObjects;
+
+	uint32_t currentFrame = 0;
+	
+	//Boolean for resizing frame buffer
+	bool framebufferResized = false;
+
+
+protected:
+
+	// Helpers
+
+	void recreateWindowResources();
+
 
 };
 

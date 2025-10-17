@@ -130,6 +130,7 @@ public:
 	static VkDevice getLogicalDevice();
 
 	static VkQueue getGraphicsQueue() { return graphicsQueue; }
+	static VkQueue getPresentQueue() { return presentQueue; }
 
 	static void cleanup();
 
@@ -180,6 +181,8 @@ protected:
 
 public:
 
+	static VkSwapchainKHR getSwapChain() { return swapchain; }
+
 	static void createSwapchain();
 
 	static void cleanupSwapchain();
@@ -187,6 +190,10 @@ public:
 	static void createImageViews();
 
 	static VkFormat getSwapchainImageFormat() { return swapchainImageFormat; }
+
+	static VkFramebuffer getSwapChainFramebufferAt(uint32_t i) { return swapchainFramebuffers[i]; }
+
+	static VkExtent2D getExtent() { return swapchainExtent; }
 
 protected:
 
@@ -241,6 +248,9 @@ public:
 
 	static VkCommandBuffer beginSingleTimeCommands();
 	static void endSingleTimeCommands(VkCommandBuffer buffer);
+
+	VkCommandBuffer getCommandBufferAt(uint32_t i) { return commandBuffers[i]; }
+	VkCommandBuffer* getCommandBufferRefAt(uint32_t i) {return &commandBuffers[i]; }
 
 };
 

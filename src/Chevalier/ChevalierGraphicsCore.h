@@ -11,3 +11,5 @@ const std::vector<const char*> CHEVALIER_DEVICE_EXTENSIONS_DEFAULTS =
 {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
+
+

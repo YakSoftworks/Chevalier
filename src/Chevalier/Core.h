@@ -16,7 +16,7 @@
 
 
 //GLM
-
+#include <glm.hpp>
 
 //Chevalier Includes
 #include "ChevalierConstants.h"
