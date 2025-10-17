@@ -20,7 +20,7 @@ public:
 class SceneComponent : public Component {
 
     //Owns a transform
-    Transform componentTransform;
+    ModelTransform componentTransform;
 
 
 };

@@ -2,6 +2,8 @@
 
 #include "ChevalierGraphicsCore.h"
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 
 struct DepthResources {

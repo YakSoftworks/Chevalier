@@ -74,7 +74,7 @@ void ColorResources::CreateColorResources(uint32_t width, uint32_t height){
     
     VulkanImage::createImage(colorImageInfo, colorImage, colorImageMemory);
 
-    VulkanImageView::CreateImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+    colorImageView = VulkanImageView::CreateImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 
 }
 

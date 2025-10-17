@@ -12,15 +12,18 @@ void ChevalierRenderer::InitRenderer()
 	// Command Pool
 	VulkanCommandPool::getCommandPool();
 
+    // Depth Resources
+    mDepthResources.CreateDepthResources(CHEVALIER_WINDOW_WIDTH_DEFAULT, CHEVALIER_WINDOW_HEIGHT_DEFAULT);
+
+    // Color Resources
+    mColorResources.CreateColorResources(CHEVALIER_WINDOW_WIDTH_DEFAULT, CHEVALIER_WINDOW_HEIGHT_DEFAULT);
+
+
 	// Framebuffer
 	ChevFramebuffer::InitFramebuffers(mColorResources.colorImageView, mDepthResources.depthImageView, mRenderPass.getRenderPass());
 	
 
-	// Depth Resources
-	mDepthResources.CreateDepthResources(CHEVALIER_WINDOW_WIDTH_DEFAULT, CHEVALIER_WINDOW_HEIGHT_DEFAULT);
 
-	// Color Resources
-	mColorResources.CreateColorResources(CHEVALIER_WINDOW_WIDTH_DEFAULT, CHEVALIER_WINDOW_HEIGHT_DEFAULT);
 
 	// Commandbuffer
 	mCommandBuffers.CreateCommandBuffers();
@@ -38,18 +41,21 @@ void ChevalierRenderer::InitRenderer()
 void ChevalierRenderer::LoopRenderer()
 {
 
-	float deltaTime = 0.f;
+    float deltaTime = 0.f;
 
-	// Run Program Tick
-	CurrentMap->Tick(deltaTime);
-	// Run Draw Tick
-	drawFrame();
-
+    // Run Program Tick
+    if (CurrentMap)
+    {
+        CurrentMap->Tick(deltaTime);
+        // Run Draw Tick
+        drawFrame();
+    }
 	
 }
 
 void ChevalierRenderer::CleanupRenderer()
 {
+    // Perform destructions
 }
 
 void ChevalierRenderer::drawFrame()

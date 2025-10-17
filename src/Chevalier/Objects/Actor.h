@@ -1,6 +1,6 @@
 #include "Core.h"
 
-#include "Component.h"
+#include "Components/Component.h"
 #include "ObjectTypes.h"
 
 class Actor{

@@ -147,6 +147,13 @@
     <ClInclude Include="src\Chevalier\Core.h" />
     <ClInclude Include="src\Chevalier\HelperObjects\ChevalierObjects.h" />
     <ClInclude Include="src\Chevalier\HelperObjects\VulkanObjects.h" />
+    <ClInclude Include="src\Chevalier\Objects\Actor.h" />
+    <ClInclude Include="src\Chevalier\Objects\BasicShapes.h" />
+    <ClInclude Include="src\Chevalier\Objects\Components\CameraComponent.h" />
+    <ClInclude Include="src\Chevalier\Objects\Components\Component.h" />
+    <ClInclude Include="src\Chevalier\Objects\Components\MeshComponent.h" />
+    <ClInclude Include="src\Chevalier\Objects\Map.h" />
+    <ClInclude Include="src\Chevalier\Objects\ObjectTypes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

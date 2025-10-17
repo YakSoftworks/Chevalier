@@ -1,7 +1,9 @@
+#pragma once
+
 #include "Core.h"
 
 
-struct Transform{
+struct ModelTransform{
 
     glm::vec3 position;
     glm::vec3 rotation;
