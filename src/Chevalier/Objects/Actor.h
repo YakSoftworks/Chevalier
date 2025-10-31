@@ -1,3 +1,4 @@
+#pragma once
 #include "Core.h"
 
 #include "Components/Component.h"
@@ -28,6 +29,10 @@ public:
         }
     };
 
+    //Component Management
+public:
+
+    void AddComponentToActor(Component* component) { actorComponents.push_back(component); }
 
 
 };

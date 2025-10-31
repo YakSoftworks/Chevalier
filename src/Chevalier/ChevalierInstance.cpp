@@ -16,7 +16,7 @@ void ChevalierInstance::InitVulkan()
 	}
 
 	//Debug
-	
+	mDebugMessenger.setupDebugMessenger();
 
 	//Surface
 	if (VulkanSurface::getSurface() == nullptr) {
@@ -48,7 +48,7 @@ void ChevalierInstance::LoopProgram()
 
 bool ChevalierInstance::CheckShouldClose()
 {
-	return false;
+	return mRenderer.CheckShouldClose();
 }
 
 void ChevalierInstance::InitChevalier()

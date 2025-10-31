@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Core.h"
 #include "Component.h"
 #include "ChevalierInterfaces.h"

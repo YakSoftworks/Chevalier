@@ -33,6 +33,9 @@
     <ClCompile Include="src\Chevalier\Objects\Materials\ChevalierMaterial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Chevalier\Objects\Components\MeshComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Chevalier\ChevalierInstance.h">

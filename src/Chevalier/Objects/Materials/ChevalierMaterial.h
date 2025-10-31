@@ -3,6 +3,8 @@
 
 #include "ChevalierInterfaces.h"
 
+#include "Objects/ObjectTypes.h"
+
 struct MaterialCreateInfo {
 
 	//Filepaths to shaders
@@ -90,24 +92,25 @@ class ChevalierMaterial : public ChevalierMaterialInterface
 public:
 	 
 	// Constructor / Destructor
-	ChevalierMaterial();
-	~ChevalierMaterial();
+	ChevalierMaterial() {};
+	~ChevalierMaterial() {};
 
 	// Init with data from the renderer
 	void init_pipeline(VkRenderPass renderPass);
 
 
 	//ChevalierMaterialInterface Implementation - Means we are bindable
-	virtual void BindMaterial(VkCommandBuffer* buffer) override;
-
+	virtual void BindMaterial(VkCommandBuffer* buffer, uint32_t currentFrame) override;
+	virtual VkPipelineLayout getMaterialLayout() { return pipelineLayout; }
 
 
 	//Pipeline information
 	VkPipelineLayout pipelineLayout;
 	VkPipeline pipeline;
 
-	//Descriptor Information
+	//Global Descriptor Information
 	static GlobalDescriptorSet sGlobalDataManager;
+	static void UpdateGlobalDescriptor(GlobalDataObject* newGlobalData, uint32_t currentFrame);
 
 protected:
 

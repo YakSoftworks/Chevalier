@@ -1,3 +1,4 @@
+#pragma once
 #include "Core.h"
 
 #include "ObjectTypes.h"
@@ -28,6 +29,13 @@ public:
             actor->EndPlay();
         }
     }
+
+
+    // Object Management
+public:
+
+    void AddActor(Actor* newActor) { MapActors.push_back(newActor); }
+
 
 
 

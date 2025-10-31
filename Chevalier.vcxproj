@@ -136,6 +136,7 @@
     <ClCompile Include="src\Chevalier\ChevalierRenderer.cpp" />
     <ClCompile Include="src\Chevalier\HelperObjects\ChevalierObjects.cpp" />
     <ClCompile Include="src\Chevalier\HelperObjects\VulkanObjects.cpp" />
+    <ClCompile Include="src\Chevalier\Objects\Components\MeshComponent.cpp" />
     <ClCompile Include="src\Chevalier\Objects\Materials\ChevalierMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>

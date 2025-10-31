@@ -12,17 +12,16 @@ struct ModelTransform{
     glm::vec3 scale;
 
 
-    glm::mat4x4 getTransform() {
+    glm::mat4 getTransform() {
 
         //TODO: Return Transform's Model Matrix
-
-        /*glm::mat4 transform(1.0f);
-
-        glm::translate(transform, position);
+        glm::mat4 transform(1.0f);
 
 
-        glm::scale(transform, scale);*/
+        transform = glm::scale(glm::translate(transform, position), scale);
 
+
+        return transform;
     }
 
 };
@@ -38,18 +37,23 @@ struct RenderAttributes {
 
 struct GlobalDataObject {
 
+    
 
+    glm::mat4 perspectiveMat;
+    glm::mat4 viewMat;
+    glm::mat4 projViewMat;
+    glm::mat4 debugModelMat;
 
 };
 
 struct ObjectShaderData {
 
-
+    glm::mat4 modelMat = glm::mat4();
 
 };
 
 struct LightShaderData {
 
-
+    float intensity = 2.f;
 
 };

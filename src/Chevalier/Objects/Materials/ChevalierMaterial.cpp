@@ -11,11 +11,15 @@ void ChevalierMaterial::createPipelineLayout()
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
-    VkDescriptorSetLayout globalDescriptorSetLayout = sGlobalDataManager.mDescriptorSetLayout;
+    pipelineLayoutInfo.pSetLayouts = &sGlobalDataManager.mDescriptorSetLayout;
 
+    VkPushConstantRange defaultDataPushRange{};
+    defaultDataPushRange.size = 4;
+    defaultDataPushRange.offset = 0;
+    defaultDataPushRange.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 
-    pipelineLayoutInfo.pSetLayouts = &globalDescriptorSetLayout;
-    pipelineLayoutInfo.pushConstantRangeCount = 0;
+    pipelineLayoutInfo.pPushConstantRanges = &defaultDataPushRange;
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
 
     if (vkCreatePipelineLayout(VulkanLogicalDevice::getLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
@@ -26,8 +30,8 @@ void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
 {
 #pragma region Shader Modules
 
-    auto vertShaderCode = FileReader::readFile("content/shaders/vert.spv");
-    auto fragShaderCode = FileReader::readFile("content/shaders/frag.spv");
+    auto vertShaderCode = FileReader::readFile("content/shaders/ChevalierII/basicVert.spv");
+    auto fragShaderCode = FileReader::readFile("content/shaders/ChevalierII/basicFrag.spv");
 
     VkShaderModule vertShaderModule = ChevalierMaterial::createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = ChevalierMaterial::createShaderModule(fragShaderCode);
@@ -75,7 +79,7 @@ void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
@@ -111,6 +115,7 @@ void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR
     };
+
     VkPipelineDynamicStateCreateInfo dynamicState{};
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
@@ -148,11 +153,26 @@ void ChevalierMaterial::init_pipeline(VkRenderPass renderPass)
 
 }
 
-void ChevalierMaterial::BindMaterial(VkCommandBuffer* buffer)
+void ChevalierMaterial::BindMaterial(VkCommandBuffer* buffer, uint32_t currentFrame)
 {
     vkCmdBindPipeline(*buffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipeline);
+
+    vkCmdBindDescriptorSets(
+        *buffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipelineLayout,
+        0,
+        1,
+        &sGlobalDataManager.mDescriptorSets[currentFrame],
+        0,
+        0);
+}
+
+void ChevalierMaterial::UpdateGlobalDescriptor(GlobalDataObject* newGlobalData, uint32_t currentFrame)
+{
+    memcpy(sGlobalDataManager.globalDataBuffersMapped[currentFrame], newGlobalData, sizeof(GlobalDataObject));
 }
 
 VkShaderModule ChevalierMaterial::createShaderModule(const std::vector<char>& code)
@@ -197,7 +217,6 @@ void GlobalDescriptorSet::CreateDescriptorSetLayout()
     lightingDataLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 
 
-
     std::array<VkDescriptorSetLayoutBinding, 3> bindings = { globalLayoutBinding, objectDataLayoutBinding, lightingDataLayoutBinding };
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -230,8 +249,6 @@ void GlobalDescriptorSet::CreateDescriptorPool()
     poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = static_cast<uint32_t>(CHEVALIER_MAX_FRAMES_IN_FLIGHT);
 
-    poolInfo.maxSets = static_cast<uint32_t>(CHEVALIER_MAX_FRAMES_IN_FLIGHT);
-
     if (vkCreateDescriptorPool(VulkanLogicalDevice::getLogicalDevice(), &poolInfo, nullptr, &mDescriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool!");
     }
@@ -244,14 +261,19 @@ void GlobalDescriptorSet::CreateDescriptorSets()
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = mDescriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(CHEVALIER_MAX_FRAMES_IN_FLIGHT);
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(layouts.size()); // static_cast<uint32_t>(CHEVALIER_MAX_FRAMES_IN_FLIGHT);
     allocInfo.pSetLayouts = layouts.data();
+    
 
     mDescriptorSets.resize(CHEVALIER_MAX_FRAMES_IN_FLIGHT);
+
+
     if (vkAllocateDescriptorSets(VulkanLogicalDevice::getLogicalDevice(), &allocInfo, mDescriptorSets.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate descriptor sets!");
     }
 
+
+    // Write Initial Values
 
     for (size_t i = 0; i < CHEVALIER_MAX_FRAMES_IN_FLIGHT; i++) {
 
@@ -260,18 +282,21 @@ void GlobalDescriptorSet::CreateDescriptorSets()
         globalBufferInfo.offset = 0;
         globalBufferInfo.range = sizeof(GlobalDataObject);
 
+
         VkDescriptorBufferInfo modelMatrixBufferInfo{};
-        globalBufferInfo.buffer = modelMatrixBuffers[i];
-        globalBufferInfo.offset = 0;
-        globalBufferInfo.range = sizeof(ObjectShaderData) * CHEVALIER_CONSTANTS_INITIAL_MODEL_COUNT;
+        modelMatrixBufferInfo.buffer = modelMatrixBuffers[i];
+        modelMatrixBufferInfo.offset = 0;
+        modelMatrixBufferInfo.range = sizeof(ObjectShaderData) * CHEVALIER_CONSTANTS_INITIAL_MODEL_COUNT;
+
 
         VkDescriptorBufferInfo lightBufferInfo{};
-        globalBufferInfo.buffer = lightingBuffers[i];
-        globalBufferInfo.offset = 0;
-        globalBufferInfo.range = sizeof(LightShaderData) * CHEVALIER_CONSTANTS_INITIAL_LIGHTING_COUNT;
+        lightBufferInfo.buffer = lightingBuffers[i];
+        lightBufferInfo.offset = 0;
+        lightBufferInfo.range = sizeof(LightShaderData) * CHEVALIER_CONSTANTS_INITIAL_LIGHTING_COUNT;
 
 
         std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+
 
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[0].dstSet = mDescriptorSets[i];
@@ -281,6 +306,7 @@ void GlobalDescriptorSet::CreateDescriptorSets()
         descriptorWrites[0].descriptorCount = 1;
         descriptorWrites[0].pBufferInfo = &globalBufferInfo;
 
+
         descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[1].dstSet = mDescriptorSets[i];
         descriptorWrites[1].dstBinding = 1;
@@ -289,6 +315,7 @@ void GlobalDescriptorSet::CreateDescriptorSets()
         descriptorWrites[1].descriptorCount = 1;
         descriptorWrites[1].pBufferInfo = &modelMatrixBufferInfo;
 
+
         descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[2].dstSet = mDescriptorSets[i];
         descriptorWrites[2].dstBinding = 2;
@@ -296,7 +323,6 @@ void GlobalDescriptorSet::CreateDescriptorSets()
         descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         descriptorWrites[2].descriptorCount = 1;
         descriptorWrites[2].pBufferInfo = &lightBufferInfo;
-
 
         vkUpdateDescriptorSets(VulkanLogicalDevice::getLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 
@@ -384,7 +410,6 @@ void GlobalDescriptorSet::init()
     CreateDescriptorPool();
     CreateDescriptorSets();
     
-
 }
 
 #pragma endregion

@@ -1,5 +1,7 @@
+#pragma once
+
 #include "Core.h"
-#include "ObjectTypes.h"
+#include "Objects/ObjectTypes.h"
 
 
 class Component{
@@ -19,6 +21,7 @@ public:
 // Component with a transform
 class SceneComponent : public Component {
 
+protected:
     //Owns a transform
     ModelTransform componentTransform;
 

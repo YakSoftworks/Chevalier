@@ -20,6 +20,10 @@ protected:
 
 	ChevalierRenderer mRenderer;
 
+	//Debug Messenger
+	ValidationMessenger mDebugMessenger;
+
+
 
 public:
 	void InitChevalier();

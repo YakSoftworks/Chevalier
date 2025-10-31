@@ -45,6 +45,9 @@ protected:
 	// Current Drawobjects
 	std::vector<ChevalierRenderObjectInterface*> RenderObjects;
 
+	// Current Materials
+	std::vector<ChevalierMaterialInterface*> Materials;
+
 	uint32_t currentFrame = 0;
 	
 	//Boolean for resizing frame buffer
@@ -57,6 +60,9 @@ protected:
 
 	void recreateWindowResources();
 
+public:
+
+	bool CheckShouldClose();
 
 };
 

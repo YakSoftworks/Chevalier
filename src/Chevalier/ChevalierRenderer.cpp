@@ -2,6 +2,9 @@
 
 #include "Objects/Materials/ChevalierMaterial.h"
 
+//DEBUG
+#include "Objects/Components/MeshComponent.h"
+
 void ChevalierRenderer::InitRenderer()
 {
 	// SwapChains
@@ -35,18 +38,50 @@ void ChevalierRenderer::InitRenderer()
 	// SyncObjects
 	SyncObjects::createSyncObjects();
 
+
     //Init our global shader data
     ChevalierMaterial::sGlobalDataManager.init();
 
+    CurrentMap = new Map();
+
 	// Materials
 
-
-
 	// Models
+
+    Actor* pActor = new Actor();
+    CubeComponent* actorCube = new CubeComponent();
+    actorCube->LoadObject();
+    actorCube->renderObjectID = 0;
+
+    Actor* pActor2 = new Actor();
+    CubeComponent* actorCube2 = new CubeComponent();
+    actorCube2->LoadObject();
+    actorCube2->renderObjectID = 1;
+
+
+    RenderObjects.push_back(actorCube);
+    RenderObjects.push_back(actorCube2);
+
+    ChevalierMaterial* myMaterial = new ChevalierMaterial();
+
+    actorCube->pMaterial = myMaterial;
+    actorCube2->pMaterial = myMaterial;
+
+    myMaterial->init_pipeline(mRenderPass.getRenderPass());
+
+    pActor->AddComponentToActor(actorCube);
+    pActor2->AddComponentToActor(actorCube2);
+
+    CurrentMap->AddActor(pActor);
+    CurrentMap->AddActor(pActor2);
+
+    CurrentMap->BeginPlay();
+
 }
 
 void ChevalierRenderer::LoopRenderer()
 {
+    glfwPollEvents();
 
     float deltaTime = 0.f;
 
@@ -88,6 +123,27 @@ void ChevalierRenderer::drawFrame()
     
 
 	// Consider updating our buffers - in theory we do that during the tick
+
+    static auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+    GlobalDataObject globalDataThisFrame{};
+    globalDataThisFrame.viewMat = glm::lookAt(glm::vec3(5.0f, 0.0f, 0.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
+    globalDataThisFrame.perspectiveMat = glm::perspective(
+        glm::radians(45.f),
+        ((float)CHEVALIER_WINDOW_WIDTH_DEFAULT / (float)CHEVALIER_WINDOW_HEIGHT_DEFAULT),
+        0.1f,
+        100.f
+    );
+
+    globalDataThisFrame.projViewMat = globalDataThisFrame.perspectiveMat * globalDataThisFrame.viewMat;
+
+    globalDataThisFrame.debugModelMat = glm::rotate(glm::mat4(1.0f), time * glm::radians(15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    
+    ChevalierMaterial::UpdateGlobalDescriptor(&globalDataThisFrame, currentFrame);
+
 
 	// Record Command Buffer
 	recordCommandBuffer(mCommandBuffers.getCommandBufferAt(currentFrame), imageIndex);
@@ -138,9 +194,6 @@ void ChevalierRenderer::drawFrame()
     }
 
     currentFrame = (currentFrame + 1) % CHEVALIER_MAX_FRAMES_IN_FLIGHT;
-
-
-
 }
 
 void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex)
@@ -188,24 +241,25 @@ void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer buffer, uint32_t ima
     scissor.extent = SwapChainManager::getExtent();
     vkCmdSetScissor(buffer, 0, 1, &scissor);
 
-
+    //CHEV_MESSAGE_LOG("Draw Iteration");
 
 	// TODO: Record Objects
 
+    ObjectShaderData* PerObjectDataThisFrame = static_cast<ObjectShaderData*>(ChevalierMaterial::sGlobalDataManager.modelMatrixBuffersMapped[currentFrame]);
+
 	for( ChevalierRenderObjectInterface* object : RenderObjects){
 
-		if(object->IsObjectDrawable()){
-			ChevalierMaterialInterface* material = object->GetObjectMaterial();
+		if(object->IsObjectDrawable()) {
+			//ChevalierMaterialInterface* material = object->GetObjectMaterial();
 
 			// Bind Material
-
+            object->GetObjectMaterial()->BindMaterial(&buffer, currentFrame);
 			//draw Object
-			object->DrawObject(buffer);
+
+			object->DrawObject(buffer, PerObjectDataThisFrame);
 
 		}
-
 	}
-
 
 
 	// End Render Pass
@@ -246,4 +300,8 @@ void ChevalierRenderer::recreateWindowResources() {
 	ChevFramebuffer::InitFramebuffers(mColorResources.colorImageView, mDepthResources.depthImageView, mRenderPass.getRenderPass());
 
 
+}
+
+bool ChevalierRenderer::CheckShouldClose() {
+    return glfwWindowShouldClose(ChevGLFWWindow::getGLFWWindow());
 }
