@@ -403,3 +403,5 @@ FodyWeavers.xsd
 # Library Files
 *.lib
 desktop.ini
+/Libraries/IMGUI/examples
+/Libraries/IMGUI/.github
