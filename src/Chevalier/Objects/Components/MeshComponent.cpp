@@ -118,13 +118,83 @@ void CubeComponent::LoadModelData(){
 
     verts = SHAPE_CUBE_VERTS;
     indices = SHAPE_CUBE_INDICES;
-    
-}
 
+}
 
 void PlaneComponent::LoadModelData(){
 
     verts = SHAPE_PLANE_VERTS;
     indices = SHAPE_PLANE_INDICES;
+
+}
+
+void CylinderComponent::LoadModelData(){
+    GenerateVerts();
+    GenerateIndicies();
+};
+
+void CylinderComponent::GenerateVerts(){
+
+    // Find our Angular Jump Distance in Radians
+    // 2*pi / n
+    double radialJump = glm::two_pi<double>() / numDivisions;
+
+    double currentRadians = 0.f;
+
+    for(int i = 0; i < numDivisions; i++){
+
+        // Points at h1 and h2
+
+        Vertex p1{};
+        Vertex p2{};
+        // Position
+        p1.pos.x = glm::sin(currentRadians);
+        p1.pos.y = .5f;
+        p1.pos.z = glm::cos(currentRadians);
+
+        p2.pos.x = glm::sin(currentRadians);
+        p2.pos.y = -.5f;
+        p2.pos.z = glm::cos(currentRadians);
+
+        // Tex-Coord
+        p1.texCoord.x = currentRadians / glm::two_pi<double>();
+        p1.texCoord.y = 1.0f;
+
+        p2.texCoord.x = currentRadians / glm::two_pi<double>();
+        p2.texCoord.y = 1.0f;
+
+        // Normals
+
+        //TODO: NORMALS
+
+        //Increment our radians
+        currentRadians += radialJump;
+    }
+
+}
+
+void CylinderComponent::GenerateIndicies(){
+
+    // MUST BE CALLED AFTER GenerateVerts()!
+    int numVerts = verts.size();
+
+    for(int i = 0; i < numDivisions; i++){ // Panels
+
+        // For Each Division
+        indices.push_back((i)%numVerts);
+        indices.push_back((i+2)%numVerts);
+        indices.push_back((i+3)%numVerts);
+        indices.push_back((i+3)%numVerts);
+        indices.push_back((i+1)%numVerts);
+        indices.push_back((i)%numVerts);
+
+    }
+
+    // TODO: Top
+    // TODO: Bottom
+
+
+
+
 
 }
