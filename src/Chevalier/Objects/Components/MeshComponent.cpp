@@ -1,6 +1,72 @@
 #include "MeshComponent.h"
 
-void CubeComponent::DrawObject(VkCommandBuffer buffer, ObjectShaderData* objectDataArray)
+void MeshComponent::LoadMeshComponent(){
+    
+    // Populate our vertex and index data
+    LoadModelData();
+
+    // Create Buffers
+    createVertexBuffer();
+    createIndexBuffer();
+}
+
+void MeshComponent::LoadModelData(){
+    /* Trigger Error */
+    CHEV_MESSAGE_ERROR("USING INVALID MESH COMPONENT LOAD");
+}
+
+void MeshComponent::createVertexBuffer(){
+    VkDeviceSize bufferSize = sizeof(verts[0]) * verts.size();
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    VulkanBuffer::createBuffer(
+        bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        stagingBuffer,
+        stagingBufferMemory);
+
+    void* data;
+    vkMapMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+    memcpy(data, verts.data(), (size_t)bufferSize);
+    vkUnmapMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory);
+
+    VulkanBuffer::createBuffer(
+        bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        mVertexBuffer,
+        mVertexBufferMemory
+    );
+
+    VulkanBuffer::copyBuffer(stagingBuffer, mVertexBuffer, bufferSize);
+
+    vkDestroyBuffer(VulkanLogicalDevice::getLogicalDevice(), stagingBuffer, nullptr);
+    vkFreeMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory, nullptr);
+}
+
+void MeshComponent::createIndexBuffer(){
+    VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    VulkanBuffer::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+    void* data;
+    vkMapMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+    memcpy(data, indices.data(), (size_t)bufferSize);
+    vkUnmapMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory);
+
+    VulkanBuffer::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mIndexBuffer, mIndexBufferMemory);
+
+    VulkanBuffer::copyBuffer(stagingBuffer, mIndexBuffer, bufferSize);
+
+    vkDestroyBuffer(VulkanLogicalDevice::getLogicalDevice(), stagingBuffer, nullptr);
+    vkFreeMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory, nullptr);
+}
+
+void MeshComponent::DrawObject(VkCommandBuffer buffer, ObjectShaderData* objectDataArray)
 {
     //Debug
     static auto startTime = std::chrono::high_resolution_clock::now();
@@ -48,62 +114,17 @@ void CubeComponent::DrawObject(VkCommandBuffer buffer, ObjectShaderData* objectD
 
 }
 
-void CubeComponent::LoadObject()
-{
-	createVertexBuffer();
-	createIndexBuffer();
+void CubeComponent::LoadModelData(){
 
+    verts = SHAPE_CUBE_VERTS;
+    indices = SHAPE_CUBE_INDICES;
+    
 }
 
-void CubeComponent::createVertexBuffer()
-{
-    VkDeviceSize bufferSize = sizeof(verts[0]) * verts.size();
 
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    VulkanBuffer::createBuffer(
-        bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        stagingBuffer,
-        stagingBufferMemory);
+void PlaneComponent::LoadModelData(){
 
-    void* data;
-    vkMapMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, verts.data(), (size_t)bufferSize);
-    vkUnmapMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory);
+    verts = SHAPE_PLANE_VERTS;
+    indices = SHAPE_PLANE_INDICES;
 
-    VulkanBuffer::createBuffer(
-        bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        mVertexBuffer,
-        mVertexBufferMemory
-    );
-
-    VulkanBuffer::copyBuffer(stagingBuffer, mVertexBuffer, bufferSize);
-
-    vkDestroyBuffer(VulkanLogicalDevice::getLogicalDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory, nullptr);
-}
-
-void CubeComponent::createIndexBuffer()
-{
-    VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
-
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    VulkanBuffer::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-
-    void* data;
-    vkMapMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, indices.data(), (size_t)bufferSize);
-    vkUnmapMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory);
-
-    VulkanBuffer::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mIndexBuffer, mIndexBufferMemory);
-
-    VulkanBuffer::copyBuffer(stagingBuffer, mIndexBuffer, bufferSize);
-
-    vkDestroyBuffer(VulkanLogicalDevice::getLogicalDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(VulkanLogicalDevice::getLogicalDevice(), stagingBufferMemory, nullptr);
 }

@@ -48,12 +48,12 @@ void ChevalierRenderer::InitRenderer()
 
     Actor* pActor = new Actor();
     CubeComponent* actorCube = new CubeComponent();
-    actorCube->LoadObject();
+    actorCube->LoadMeshComponent();
     actorCube->renderObjectID = 0;
 
     Actor* pActor2 = new Actor();
     CubeComponent* actorCube2 = new CubeComponent();
-    actorCube2->LoadObject();
+    actorCube2->LoadMeshComponent();
     actorCube2->renderObjectID = 1;
 
 

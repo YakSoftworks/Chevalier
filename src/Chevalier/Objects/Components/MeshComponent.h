@@ -22,55 +22,27 @@ public:
 	// Gets the resource to get information of the object's material
 	virtual ChevalierMaterialInterface* GetObjectMaterial() override;
 
-private:
 
-
-
-    //TODO: References to mesh and material
-        
-
-
-};
-
-class CubeComponent : public SceneComponent, public ChevalierRenderObjectInterface {
-
-
-	//ChevalierRenderObjectInterface Implementations
-public:
-
-	// Function to bind object data to the given command buffer
-	virtual void DrawObject(VkCommandBuffer buffer, ObjectShaderData* objectDataArray) override;
-
-	// Returns a bool of whether or not an object is drawable
-	virtual bool IsObjectDrawable() override { return true; }
-
-	// Gets the resource to get information of the object's material
-	virtual ChevalierMaterialInterface* GetObjectMaterial() override { return pMaterial; }
 
 public:
 
-	//References to mesh and material
+	void LoadMeshComponent();
+
+	// Material reference
 	ChevalierMaterialInterface* pMaterial;
 
-
-
-
-	//DEBUG:
-
-public:
-
-	//Setup
-	void LoadObject();
-
 protected:
+
+	// Puts the Vertex and Index Data into the Vectors
+	virtual void LoadModelData();
 
 	void createVertexBuffer();
 	void createIndexBuffer();
 
-
-	// Here, we own what it means to be a cube
-	std::vector<Vertex> verts = SHAPE_CUBE_VERTS;
-	std::vector<uint32_t> indices = SHAPE_CUBE_INDICES;
+    //TODO: References to mesh and material
+	// Here, we own what it means to be our shape
+	std::vector<Vertex> verts;
+	std::vector<uint32_t> indices;
 
 	VkBuffer mVertexBuffer;
 	VkDeviceMemory mVertexBufferMemory;
@@ -79,7 +51,35 @@ protected:
 	VkDeviceMemory mIndexBufferMemory;
 
 
+
 	//Transform
-	glm::mat4 objectTransform = glm::identity<glm::mat4>();
+	glm::mat4 componentTransform = glm::identity<glm::mat4>();
+        
+
+
+};
+
+class CubeComponent : public MeshComponent {
+
+public:
+
+	//References to mesh and material
+	ChevalierMaterialInterface* pMaterial;
+
+protected:
+	virtual void LoadModelData() override;
+
+
+};
+
+class PlaneComponent : public MeshComponent {
+
+public:
+
+	//References to mesh and material
+	ChevalierMaterialInterface* pMaterial;
+
+protected:
+	virtual void LoadModelData() override;
 
 };
