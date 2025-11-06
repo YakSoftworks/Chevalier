@@ -238,3 +238,100 @@ void CylinderComponent::GenerateIndicies(){
 
 
 }
+
+
+void SphereComponent::LoadModelData()
+{
+    GenerateVerts();
+    GenerateIndicies();
+}
+
+void SphereComponent::GenerateVerts() {
+
+    //UV SPHERE
+
+    //GENERATE FANCY CYLINDERS FOR EACH ROW
+
+    verts.clear();
+    verts.reserve(2 * numDivisions * (numDivisions+1));
+
+    // Find our Angular Jump Distance in Radians
+    // 2*pi / n
+    double radialJump = glm::two_pi<double>() / numDivisions;
+
+    double currentRadians = 0.f;
+    double currentHeightRadians = 0.f;
+
+    for(uint32_t height = 0; height < numDivisions+1; height++) {
+
+        for (uint32_t i = 0; i < numDivisions; i++) {
+
+            // Points at h1 and h2
+
+            Vertex p1{};
+            // Position
+            p1.pos.x = static_cast<float>(sin(currentRadians) * sin(currentHeightRadians)); //static_cast<float>(glm::sin(currentRadians));
+            p1.pos.y = static_cast<float>(cos(currentRadians) * sin(currentHeightRadians)); //static_cast<float>(glm::cos(currentRadians));
+            p1.pos.z = static_cast<float>(cos(currentHeightRadians));
+
+            // Tex-Coord
+            p1.texCoord.x = static_cast<float>(currentRadians / glm::two_pi<double>());
+            p1.texCoord.y = static_cast<float>(sin(currentHeightRadians));
+
+            // Colors
+            p1.color.x = static_cast<float>(currentRadians / glm::two_pi<double>());
+            p1.color.y = static_cast<float>(sin(currentHeightRadians));
+
+            //TODO: NORMALS
+
+            //Submit Vert
+            verts.push_back(p1);
+
+            //Increment our radians
+            currentRadians += radialJump;
+        }
+
+
+        currentHeightRadians += radialJump / 2;
+    }
+
+   
+}
+
+void SphereComponent::GenerateIndicies() {
+
+    // MUST BE CALLED AFTER GenerateVerts()!
+
+    indices.clear();
+    indices.reserve(6 * numDivisions * numDivisions);
+
+    uint32_t numVerts = static_cast<uint32_t>(verts.size());
+
+    for (uint32_t height = 0; height < numDivisions; height++) {
+
+        for (uint32_t i = 0; i < numDivisions; i++) { // Panels
+
+            // For Each Division
+
+            //Winding RH
+            /*indices.push_back(((2 * i) + 2) % numVerts);
+            indices.push_back(((2 * i)) % numVerts);
+            indices.push_back(((2 * i) + 3) % numVerts);
+
+            indices.push_back(((2 * i)) % numVerts);
+            indices.push_back(((2 * i) + 1) % numVerts);
+            indices.push_back(((2 * i) + 3) % numVerts);*/
+
+            indices.push_back((height * numDivisions) + (i) % numDivisions);
+            indices.push_back((height * numDivisions) + (i + 1)%numDivisions);
+            indices.push_back(((height + 1) * numDivisions) + (i + 1) % numDivisions);
+
+            indices.push_back(((height + 1) * numDivisions) + (i) % numDivisions);
+            indices.push_back((height * numDivisions) + (i) % numDivisions);
+            indices.push_back(((height + 1) * numDivisions) + (i + 1) % numDivisions);
+
+        }
+
+    }
+
+}
