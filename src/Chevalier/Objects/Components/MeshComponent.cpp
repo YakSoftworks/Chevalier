@@ -200,7 +200,7 @@ void CylinderComponent::GenerateVerts(){
 void CylinderComponent::GenerateIndicies(){
 
     indices.clear();
-    indices.reserve(6*numDivisions);
+    indices.reserve(6*numDivisions + 2*(3*(numDivisions-2)));
 
     // MUST BE CALLED AFTER GenerateVerts()!
     uint32_t numVerts = static_cast<uint32_t>(verts.size());
@@ -231,9 +231,45 @@ void CylinderComponent::GenerateIndicies(){
     }
 
     // TODO: Top
+    // Odds
+
+
     // TODO: Bottom
+    // Evens
+    uint32_t leftIndex = static_cast<uint32_t>(verts.size()-2);
+    uint32_t rightIndex = 0;
 
+    while(leftIndex-rightIndex > 2){
 
+        //Note: 1 - 2 - Increment - 3
+        
+        //Bottom Triangle
+        indices.push_back(rightIndex);
+        indices.push_back(leftIndex);
+        indices.push_back(rightIndex+2);
+
+        //Top Triangle
+        indices.push_back(rightIndex+1);
+        indices.push_back(leftIndex+1);
+        indices.push_back(rightIndex+3);
+
+        rightIndex+=2;
+
+        
+
+        //Bottom Triangle
+        indices.push_back(rightIndex);
+        indices.push_back(leftIndex);
+        indices.push_back(leftIndex+2);
+
+        //Top Triangle
+        indices.push_back(rightIndex+1);
+        indices.push_back(leftIndex+1);
+        indices.push_back(rightIndex+3);
+
+        leftIndex-=2;
+
+    }
 
 
 
