@@ -1,5 +1,5 @@
 # Chevalier
 
-A self-made Renderer built from Vulkan for utilization for research purposes.
+A self-made Renderer built from Vulkan for aiding with research.
 
 More details to come...
