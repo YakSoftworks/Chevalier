@@ -96,7 +96,7 @@ void MeshComponent::DrawObject(VkCommandBuffer buffer, ObjectShaderData* objectD
     }
 
     //debug Model Mat
-    ObjectDataThisFrame.modelMat = glm::translate(glm::mat4(1.0f), TranslationVector);
+    ObjectDataThisFrame.modelMat = glm::translate(glm::mat4(1.0f), TranslationVector) * glm::rotate(glm::mat4(1.0f), time * glm::radians(15.0f), glm::vec3(0.f, 1.f, 1.f));
         
         //glm::rotate(glm::mat4(1.0f), renderObjectID * time * glm::radians(15.0f), RotationVector);
 
@@ -113,6 +113,17 @@ void MeshComponent::DrawObject(VkCommandBuffer buffer, ObjectShaderData* objectD
     //CHEV_MESSAGE_LOG("Drawing Cube");
 
 }
+
+bool MeshComponent::IsObjectDrawable()
+{
+    return true;
+}
+
+ChevalierMaterialInterface* MeshComponent::GetObjectMaterial()
+{
+    return pMaterial;
+}
+
 
 void CubeComponent::LoadModelData(){
 
@@ -144,31 +155,41 @@ void CylinderComponent::GenerateVerts(){
 
     double currentRadians = 0.f;
 
-    for(int i = 0; i < numDivisions; i++){
+    for(uint32_t i = 0; i < numDivisions; i++){
 
         // Points at h1 and h2
 
         Vertex p1{};
         Vertex p2{};
         // Position
-        p1.pos.x = glm::sin(currentRadians);
-        p1.pos.y = .5f;
-        p1.pos.z = glm::cos(currentRadians);
+        p1.pos.x = static_cast<float>(sin(currentRadians)); //static_cast<float>(glm::sin(currentRadians));
+        p1.pos.y = static_cast<float>(cos(currentRadians)); //static_cast<float>(glm::cos(currentRadians));
+        p1.pos.z = 1.f;
 
-        p2.pos.x = glm::sin(currentRadians);
-        p2.pos.y = -.5f;
-        p2.pos.z = glm::cos(currentRadians);
+        p2.pos.x = static_cast<float>(glm::sin(currentRadians));
+        p2.pos.y = static_cast<float>(glm::cos(currentRadians));
+        
+        p2.pos.z = -1.f;
 
         // Tex-Coord
-        p1.texCoord.x = currentRadians / glm::two_pi<double>();
+        p1.texCoord.x = static_cast<float>(currentRadians / glm::two_pi<double>());
         p1.texCoord.y = 1.0f;
 
-        p2.texCoord.x = currentRadians / glm::two_pi<double>();
+        p2.texCoord.x = static_cast<float>(currentRadians / glm::two_pi<double>());
         p2.texCoord.y = 1.0f;
 
-        // Normals
+        // Colors
+        p1.color.x = static_cast<float>(currentRadians / glm::two_pi<double>());
+        p1.color.y = 1.0f;
+
+        p2.color.x = static_cast<float>(currentRadians / glm::two_pi<double>());
+        p2.color.y = 0.0f;
 
         //TODO: NORMALS
+
+        //Submit Verts
+        verts.push_back(p2);
+        verts.push_back(p1);
 
         //Increment our radians
         currentRadians += radialJump;
@@ -182,17 +203,30 @@ void CylinderComponent::GenerateIndicies(){
     indices.reserve(6*numDivisions);
 
     // MUST BE CALLED AFTER GenerateVerts()!
-    int numVerts = verts.size();
+    uint32_t numVerts = static_cast<uint32_t>(verts.size());
 
-    for(int i = 0; i < numDivisions; i++){ // Panels
+    for(uint32_t i = 0; i < numDivisions; i++){ // Panels
 
         // For Each Division
-        indices.push_back((i)%numVerts);
-        indices.push_back((i+2)%numVerts);
-        indices.push_back((i+3)%numVerts);
-        indices.push_back((i+3)%numVerts);
-        indices.push_back((i+1)%numVerts);
-        indices.push_back((i)%numVerts);
+
+        //Winding 1
+        /*indices.push_back(((2 * i))% numVerts);
+        indices.push_back(((2 * i) + 2)% numVerts);
+        indices.push_back(((2 * i) + 3)% numVerts);
+        indices.push_back(((2 * i) + 3)% numVerts);
+        indices.push_back(((2 * i) + 1)% numVerts);
+        indices.push_back(((2 * i))% numVerts);*/
+
+        //Winding 2
+        indices.push_back(((2 * i) + 2) % numVerts);
+        indices.push_back(((2 * i)) % numVerts);
+        indices.push_back(((2 * i) + 3) % numVerts);
+        
+        indices.push_back(((2 * i)) % numVerts);
+        indices.push_back(((2 * i) + 1) % numVerts);
+        indices.push_back(((2 * i) + 3) % numVerts);
+        
+        
 
     }
 

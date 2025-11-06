@@ -63,9 +63,6 @@ class CubeComponent : public MeshComponent {
 
 public:
 
-	//References to mesh and material
-	ChevalierMaterialInterface* pMaterial;
-
 protected:
 	virtual void LoadModelData() override;
 
@@ -74,10 +71,6 @@ protected:
 
 class PlaneComponent : public MeshComponent {
 
-public:
-
-	//References to mesh and material
-	ChevalierMaterialInterface* pMaterial;
 
 protected:
 	virtual void LoadModelData() override;

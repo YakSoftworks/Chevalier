@@ -46,31 +46,31 @@ void ChevalierRenderer::InitRenderer()
 
 	// Models
 
-    Actor* pActor = new Actor();
-    CubeComponent* actorCube = new CubeComponent();
+    /*Actor* pActor = new Actor();
+    MeshComponent* actorCube = new CubeComponent();
     actorCube->LoadMeshComponent();
-    actorCube->renderObjectID = 0;
+    actorCube->renderObjectID = 0;*/
 
     Actor* pActor2 = new Actor();
-    CubeComponent* actorCube2 = new CubeComponent();
+    CylinderComponent* actorCube2 = new CylinderComponent();
     actorCube2->LoadMeshComponent();
     actorCube2->renderObjectID = 1;
 
 
-    RenderObjects.push_back(actorCube);
+    //RenderObjects.push_back(actorCube);
     RenderObjects.push_back(actorCube2);
 
     ChevalierMaterial* myMaterial = new ChevalierMaterial();
 
-    actorCube->pMaterial = myMaterial;
+    //actorCube->pMaterial = myMaterial;
     actorCube2->pMaterial = myMaterial;
 
     myMaterial->init_pipeline(mRenderPass.getRenderPass());
 
-    pActor->AddComponentToActor(actorCube);
+    //pActor->AddComponentToActor(actorCube);
     pActor2->AddComponentToActor(actorCube2);
 
-    actors.push_back(pActor);
+    //actors.push_back(pActor);
     actors.push_back(pActor2);
 
 }
