@@ -41,4 +41,23 @@
 #pragma region cylinder
 #pragma endregion
 
+#pragma region Plane
+
+#define SHAPE_PLANE_VERTS \
+    { \
+        /*{ {Pos}, {Color}, {TexCoord} }*/ \
+    { { -0.5f, -0.5f,  0.f},  {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f} },\
+    { {  0.5f, -0.5f,  0.f},  {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f} },\
+    { {  0.5f,  0.5f,  0.f},  {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f} },\
+    { { -0.5f,  0.5f,  0.f},  {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f} },\
+    };\
+
+    // RH - Triangle List
+#define SHAPE_PLANE_INDICES \
+    {\
+        0,1,2,2,3,0, /* Front Face */\
+        3,2,1,1,4,3  /* Back  Face */ \ 
+    };\
+
+#pragma endregion
 
