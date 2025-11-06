@@ -135,6 +135,9 @@ void CylinderComponent::LoadModelData(){
 
 void CylinderComponent::GenerateVerts(){
 
+    verts.clear();
+    verts.reserve(2*numDivisions);
+
     // Find our Angular Jump Distance in Radians
     // 2*pi / n
     double radialJump = glm::two_pi<double>() / numDivisions;
@@ -174,6 +177,9 @@ void CylinderComponent::GenerateVerts(){
 }
 
 void CylinderComponent::GenerateIndicies(){
+
+    indices.clear();
+    indices.reserve(6*numDivisions);
 
     // MUST BE CALLED AFTER GenerateVerts()!
     int numVerts = verts.size();
