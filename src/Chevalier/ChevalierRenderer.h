@@ -38,10 +38,6 @@ protected:
 	//TODO: COLOR RESOURCES
 	ColorResources mColorResources;
 
-
-	// Current Map Reference
-	Map* CurrentMap;
-
 	// Current Drawobjects
 	std::vector<ChevalierRenderObjectInterface*> RenderObjects;
 
@@ -52,6 +48,10 @@ protected:
 	
 	//Boolean for resizing frame buffer
 	bool framebufferResized = false;
+
+
+	// Temporary Object Management
+	std::vector<Actor*> actors; 
 
 
 protected:

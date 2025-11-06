@@ -74,7 +74,7 @@ struct ChevFramebuffer {
 
 	static void InitFramebuffers(VkImageView colorImageView, VkImageView depthImageView, VkRenderPass renderPass);
 
-
+    static void Cleanup(VkFramebuffer framebuffer);
 
 };
 

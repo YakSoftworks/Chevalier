@@ -150,6 +150,8 @@ public:
 		return vRenderPass;
 	}
 
+	void Cleanup();
+
 };
 
 struct SwapChainManager {
@@ -277,6 +279,12 @@ struct VulkanImage {
 
 	static uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
+	// Cleanups
+
+	static void CleanupImage(VkImage image);
+
+	static void CleanupImageView(VkImageView imageView);
+
 };
 
 struct VulkanBuffer {
@@ -284,6 +292,8 @@ struct VulkanBuffer {
 	static void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
 	static void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+	static void cleanupBuffer(VkBuffer buffer);
 
 };
 

@@ -42,8 +42,6 @@ void ChevalierRenderer::InitRenderer()
     //Init our global shader data
     ChevalierMaterial::sGlobalDataManager.init();
 
-    CurrentMap = new Map();
-
 	// Materials
 
 	// Models
@@ -72,10 +70,8 @@ void ChevalierRenderer::InitRenderer()
     pActor->AddComponentToActor(actorCube);
     pActor2->AddComponentToActor(actorCube2);
 
-    CurrentMap->AddActor(pActor);
-    CurrentMap->AddActor(pActor2);
-
-    CurrentMap->BeginPlay();
+    actors.push_back(pActor);
+    actors.push_back(pActor2);
 
 }
 
@@ -85,13 +81,9 @@ void ChevalierRenderer::LoopRenderer()
 
     float deltaTime = 0.f;
 
-    // Run Program Tick
-    if (CurrentMap)
-    {
-        CurrentMap->Tick(deltaTime);
-        // Run Draw Tick
-        drawFrame();
-    }
+    // Draw Current Frame
+    drawFrame();
+    
 	
 }
 

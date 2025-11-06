@@ -1,7 +1,7 @@
 #include "VulkanObjects.h"
 
 
-
+#pragma region StaticObjectDefs
 // Static Objects
 VkInstance VulkanInstance::ProjectInstance = nullptr;
 GLFWwindow* ChevGLFWWindow::pWindow = nullptr;
@@ -20,6 +20,8 @@ std::vector<VkImageView> SwapChainManager::swapchainImageViews;
 std::vector<VkFramebuffer> SwapChainManager::swapchainFramebuffers;
 
 VkCommandPool VulkanCommandPool::commandPool = nullptr;
+
+#pragma endregion
 
 #pragma region VulkanInstance
 
@@ -278,8 +280,8 @@ VkPhysicalDevice VulkanPhysicalDevice::getPhysicalDevice()
 
 void VulkanPhysicalDevice::cleanup() {
     // Do nothing???
-}
 
+}
 
 #pragma endregion
 
@@ -517,6 +519,15 @@ void VulkanRenderPass::CreateRenderPass(VkFormat swapchainImageFormat)
 
 }
 
+void VulkanRenderPass::Cleanup(){
+
+    vkDestroyRenderPass(
+        VulkanLogicalDevice::getLogicalDevice(),
+        vRenderPass,
+        nullptr
+    );
+
+}
 #pragma endregion
 
 #pragma region SwapChainManager
@@ -669,6 +680,8 @@ VkImageView VulkanImageView::CreateImageView(VkImage image, VkFormat imageFormat
 
 #pragma endregion
 
+#pragma region VulkanImageFormat
+
 VkFormat VulkanImageFormat::getSupportedFormat(const std::vector<VkFormat> candidates, VkImageTiling tiling, VkFormatFeatureFlagBits features)
 {
     for (const auto format : candidates) {
@@ -687,6 +700,10 @@ VkFormat VulkanImageFormat::getSupportedFormat(const std::vector<VkFormat> candi
 
     CHEV_MESSAGE_ERROR("Failed to find Supported Format");
 }
+
+#pragma endregion
+
+#pragma region VulkanCommandPool
 
 void VulkanCommandPool::CreateCommandPool()
 {
@@ -708,6 +725,10 @@ void VulkanCommandPool::CreateCommandPool()
 
 
 }
+
+#pragma endregion
+
+#pragma region VulkanCommandBuffers
 
 void VulkanCommandBuffers::CreateCommandBuffers()
 {
@@ -760,6 +781,35 @@ void VulkanCommandBuffers::endSingleTimeCommands(VkCommandBuffer buffer)
     vkFreeCommandBuffers(VulkanLogicalDevice::getLogicalDevice(), VulkanCommandPool::getCommandPool(), 1, &buffer);
 }
 
+#pragma endregion
+
+#pragma region VulkanImage
+
+VkImageView VulkanImage::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevel)
+{
+    VkImageViewCreateInfo info{};
+
+    info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    info.image = image;
+    info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    info.format = format;
+    info.subresourceRange.aspectMask = aspectFlags;
+    info.subresourceRange.baseMipLevel = 0;
+    info.subresourceRange.levelCount = mipLevel;
+    info.subresourceRange.baseArrayLayer = 0;
+    info.subresourceRange.layerCount = 1;
+
+    VkImageView newImageView;
+
+    if (vkCreateImageView(VulkanLogicalDevice::getLogicalDevice(), &info, nullptr, &newImageView) != VK_SUCCESS)
+    {
+        CHEV_MESSAGE_ERROR(" Failed to create Image View ");
+    }
+
+    return newImageView;
+
+}
+
 void VulkanImage::createImage(const ImageCreationInfo& info, VkImage& image, VkDeviceMemory& imageMemory)
 {
     VkImageCreateInfo imageInfo{};
@@ -796,31 +846,6 @@ void VulkanImage::createImage(const ImageCreationInfo& info, VkImage& image, VkD
 
     vkBindImageMemory(VulkanLogicalDevice::getLogicalDevice(), image, imageMemory, 0);
 
-
-}
-
-VkImageView VulkanImage::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevel)
-{
-    VkImageViewCreateInfo info{};
-
-    info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    info.image = image;
-    info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    info.format = format;
-    info.subresourceRange.aspectMask = aspectFlags;
-    info.subresourceRange.baseMipLevel = 0;
-    info.subresourceRange.levelCount = mipLevel;
-    info.subresourceRange.baseArrayLayer = 0;
-    info.subresourceRange.layerCount = 1;
-
-    VkImageView newImageView;
-
-    if (vkCreateImageView(VulkanLogicalDevice::getLogicalDevice(), &info, nullptr, &newImageView) != VK_SUCCESS)
-    {
-        CHEV_MESSAGE_ERROR(" Failed to create Image View ");
-    }
-
-    return newImageView;
 
 }
 
@@ -905,6 +930,30 @@ uint32_t VulkanImage::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags 
 
 }
 
+void VulkanImage::CleanupImage(VkImage image){
+
+    vkDestroyImage(
+        VulkanLogicalDevice::getLogicalDevice(),
+        image,
+        nullptr
+    );
+
+}
+
+void VulkanImage::CleanupImageView(VkImageView imageView){
+
+    vkDestroyImageView(
+        VulkanLogicalDevice::getLogicalDevice(),
+        imageView,
+        nullptr
+    );
+
+}
+
+#pragma endregion
+
+#pragma region VulkanBuffer
+
 void VulkanBuffer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
 {
     //Creation Object
@@ -952,6 +1001,20 @@ void VulkanBuffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSi
     VulkanCommandBuffers::endSingleTimeCommands(commandBuffer);
 }
 
+void VulkanBuffer::cleanupBuffer(VkBuffer buffer){
+
+    vkDestroyBuffer(
+        VulkanLogicalDevice::getLogicalDevice(),
+        buffer,
+        nullptr
+    );
+
+}
+
+#pragma endregion
+
+#pragma region ValidationManager
+
 void ValidationMessenger::setupDebugMessenger()
 {
     VkDebugUtilsMessengerCreateInfoEXT createInfo;
@@ -992,3 +1055,5 @@ bool ValidationMessenger::checkValidationLayerSupport()
 
     return true;
 }
+
+#pragma endregion

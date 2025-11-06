@@ -147,4 +147,14 @@ void ChevFramebuffer::InitFramebuffers(VkImageView colorImageView, VkImageView d
     }
 }
 
+void ChevFramebuffer::Cleanup(VkFramebuffer framebuffer){
+
+    vkDestroyFramebuffer(
+        VulkanLogicalDevice::getLogicalDevice(),
+        framebuffer,
+        nullptr
+    );
+
+}
+
 #pragma endregion
