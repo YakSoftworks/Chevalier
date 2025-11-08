@@ -51,9 +51,9 @@ protected:
 	VkDeviceMemory mIndexBufferMemory;
 
 
-
+public:
 	//Transform
-	glm::mat4 componentTransform = glm::identity<glm::mat4>();
+	ModelTransform componentTransform;
         
 
 
@@ -79,7 +79,7 @@ protected:
 
 class CylinderComponent : public MeshComponent {
 
-	uint32_t numDivisions = 10;
+	uint32_t numDivisions = 40;
 
 	virtual void LoadModelData() override;
 
@@ -93,7 +93,7 @@ private:
 
 class SphereComponent : public MeshComponent {
 
-	uint32_t numDivisions = 10;
+	uint32_t numDivisions = 40;
 
 	virtual void LoadModelData() override;
 

@@ -96,9 +96,11 @@ void MeshComponent::DrawObject(VkCommandBuffer buffer, ObjectShaderData* objectD
     }
 
     //debug Model Mat
-    ObjectDataThisFrame.modelMat = glm::translate(glm::mat4(1.0f), TranslationVector) * glm::rotate(glm::mat4(1.0f), time * glm::radians(15.0f), glm::vec3(0.f, 1.f, 1.f));
+    //ObjectDataThisFrame.modelMat = glm::translate(glm::mat4(1.0f), TranslationVector) * glm::rotate(glm::mat4(1.0f), time * glm::radians(15.0f), glm::vec3(0.f, 1.f, 1.f));
         
         //glm::rotate(glm::mat4(1.0f), renderObjectID * time * glm::radians(15.0f), RotationVector);
+
+    ObjectDataThisFrame.modelMat = componentTransform.getTransform();
 
     objectDataArray[renderObjectID] = ObjectDataThisFrame;
 
@@ -176,7 +178,7 @@ void CylinderComponent::GenerateVerts(){
         p1.texCoord.y = 1.0f;
 
         p2.texCoord.x = static_cast<float>(currentRadians / glm::two_pi<double>());
-        p2.texCoord.y = 1.0f;
+        p2.texCoord.y = 0.0f;
 
         // Colors
         p1.color.x = static_cast<float>(currentRadians / glm::two_pi<double>());
@@ -333,6 +335,7 @@ void SphereComponent::GenerateVerts() {
             // Colors
             p1.color.x = static_cast<float>(currentRadians / glm::two_pi<double>());
             p1.color.y = static_cast<float>(sin(currentHeightRadians));
+            p1.color.z = static_cast<float>(cos(currentHeightRadians));
 
             //TODO: NORMALS
 
