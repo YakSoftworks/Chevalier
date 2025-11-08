@@ -46,7 +46,7 @@ void ChevalierRenderer::InitRenderer()
 
 	// Models
 
-    Actor* pActor = new Actor();
+    /*Actor* pActor = new Actor();
     MeshComponent* actorCube = new SphereComponent();
     actorCube->LoadMeshComponent();
     actorCube->renderObjectID = 0;
@@ -71,7 +71,68 @@ void ChevalierRenderer::InitRenderer()
     pActor2->AddComponentToActor(actorCube2);
 
     actors.push_back(pActor);
-    actors.push_back(pActor2);
+    actors.push_back(pActor2);*/
+
+
+
+
+    //Debug:
+
+    //Setting Object Transforms
+    MeshComponent* floor = new PlaneComponent();
+    floor->renderObjectID = 1;
+    floor->componentTransform.position = glm::vec3(0.f, 0.f, 1.5f);
+    floor->componentTransform.rotation = glm::vec3(0.f, 90.f, 90.f);
+    floor->componentTransform.scale = glm::vec3(7.f, 1.f, 5.f);
+    floor->LoadMeshComponent();
+    RenderObjects.push_back(floor);
+
+    ////Ball
+    MeshComponent* ball = new SphereComponent();
+    ball->renderObjectID = 2;
+    ball->componentTransform.position = glm::vec3(0.f, 2.f, 1.f);
+    ball->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
+    ball->componentTransform.scale = glm::vec3(.5f, .5f, .5f);
+    ball->LoadMeshComponent();
+    RenderObjects.push_back(ball);
+
+    ////Pin
+    MeshComponent* pin1 = new CylinderComponent();
+    pin1->renderObjectID = 3;
+    pin1->componentTransform.position = glm::vec3(0.f, -2.f, 1.f);
+    pin1->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
+    pin1->componentTransform.scale = glm::vec3(.25f, .25f, .5f);
+    pin1->LoadMeshComponent();
+    RenderObjects.push_back(pin1);
+
+    MeshComponent* pin2 = new CylinderComponent();
+    pin2->renderObjectID = 4;
+    pin2->componentTransform.position = glm::vec3(-.5f, -2.5f, 1.f);
+    pin2->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
+    pin2->componentTransform.scale = glm::vec3(.25f, .25f, .5f);
+    pin2->LoadMeshComponent();
+    RenderObjects.push_back(pin2);
+
+    MeshComponent* pin3 = new CylinderComponent();
+    pin3->renderObjectID = 5;
+    pin3->componentTransform.position = glm::vec3(.5f, -2.5f, 1.f);
+    pin3->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
+    pin3->componentTransform.scale = glm::vec3(.25f, .25f, .5f);
+    pin3->LoadMeshComponent();
+    RenderObjects.push_back(pin3);
+
+
+    ChevalierMaterial* myMaterial = new ChevalierMaterial();
+    myMaterial->init_pipeline(mRenderPass.getRenderPass());
+
+    floor->pMaterial = myMaterial;
+    ball->pMaterial = myMaterial;
+    pin1->pMaterial = myMaterial;
+    pin2->pMaterial = myMaterial;
+    pin3->pMaterial = myMaterial;
+
+    
+
 
 }
 
@@ -122,7 +183,7 @@ void ChevalierRenderer::drawFrame()
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     GlobalDataObject globalDataThisFrame{};
-    globalDataThisFrame.viewMat = glm::lookAt(glm::vec3(5.0f, 0.0f, 0.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
+    globalDataThisFrame.viewMat = glm::lookAt(glm::vec3(-5.0f, -5.0f, -1.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
     globalDataThisFrame.perspectiveMat = glm::perspective(
         glm::radians(45.f),
         ((float)CHEVALIER_WINDOW_WIDTH_DEFAULT / (float)CHEVALIER_WINDOW_HEIGHT_DEFAULT),
