@@ -93,7 +93,7 @@ private:
 
 class SphereComponent : public MeshComponent {
 
-	uint32_t numDivisions = 40;
+	uint32_t numDivisions = 10;
 
 	virtual void LoadModelData() override;
 

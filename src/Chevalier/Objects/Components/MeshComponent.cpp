@@ -408,7 +408,7 @@ void NPlaneComponent::GenerateVerts() {
     verts.clear();
 
 
-    float intervalSize = 1 / (numDivisions-1);
+    double intervalSize = 1 / (numDivisions-1);
 
     // For each row
     for(uint32_t i = 0; i < numDivisions; i++){
@@ -418,14 +418,14 @@ void NPlaneComponent::GenerateVerts() {
 
             Vertex newVertex{};
 
-            newVertex.pos.x = i * intervalSize;
-            newVertex.pos.z = j * intervalSize;
+            newVertex.pos.x = static_cast<float>(i) / (numDivisions-1);
+            newVertex.pos.z = static_cast<float>(j) / (numDivisions - 1);
 
-            newVertex.color.x = i * intervalSize;
-            newVertex.color.z = j * intervalSize;
+            newVertex.color.x = static_cast<float>(i) / (numDivisions - 1);
+            newVertex.color.z = static_cast<float>(j) / (numDivisions - 1);
 
-            newVertex.texCoord.x = i * intervalSize;
-            newVertex.texCoord.y = j * intervalSize;
+            newVertex.texCoord.x = static_cast<float>(i) / (numDivisions - 1);
+            newVertex.texCoord.y = static_cast<float>(j) / (numDivisions - 1);
 
             verts.push_back(newVertex);
 
@@ -438,6 +438,8 @@ void NPlaneComponent::GenerateIndicies() {
 
     indices.clear();
     indices.resize((numDivisions-1)*(numDivisions-1)*12);
+
+    uint32_t count = 0;
 
     for(uint32_t i = 0; i < numDivisions-1; i++){
 
@@ -459,25 +461,31 @@ void NPlaneComponent::GenerateIndicies() {
 
             //Top Triangles
 
-            indices.push_back( (numDivisions * i) + j);
-            indices.push_back( (numDivisions * i) + j+1);
-            indices.push_back( (numDivisions * i+1) + j);
-
-            indices.push_back( (numDivisions * i+1) + j);
-            indices.push_back( (numDivisions * i+1) + j+1);
-            indices.push_back( (numDivisions * i) + j);
-
+            
+            indices[count]=( (numDivisions * i) + j);
+            indices[count + 1] = ((numDivisions * i) + j + 1);
+            indices[count+2]=( (numDivisions * (i+1)) + j);
+            
+            
+            indices[count+3]=( (numDivisions * (i+1)) + j);
+            indices[count + 4] = ((numDivisions * (i + 1)) + j + 1);
+            indices[count+5]=( (numDivisions * i) + j+1);
+            
 
             //Bottom Triangles
 
-            indices.push_back( (numDivisions * i) + j+1);
-            indices.push_back( (numDivisions * i) + j);
-            indices.push_back( (numDivisions * i+1) + j);
+            indices[count+6] = ( (numDivisions * i) + j+1);
+            
+            indices[count+7] = ( (numDivisions * i) + j);
+            indices[count + 8] = ((numDivisions * (i + 1)) + j);
+            
 
-            indices.push_back( (numDivisions * i+1) + j+1);
-            indices.push_back( (numDivisions * i+1) + j);
-            indices.push_back( (numDivisions * i) + j);
+            indices[count+9] = ( (numDivisions * (i+1)) + j+1);
+            indices[count + 10] = ((numDivisions * i) + j);
+            indices[count+11] = ( (numDivisions * (i+1)) + j+1);
+            
 
+            count += 12;
         }
 
     }
