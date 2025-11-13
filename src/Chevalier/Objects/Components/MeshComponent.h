@@ -104,3 +104,18 @@ private:
 	void GenerateIndicies();
 
 };
+
+class NPlaneComponent : public MeshComponent {
+
+	uint32_t numDivisions = 10;
+
+	virtual void LoadModelData() override;
+
+	//Helpers for Verts And Indicies
+private:
+	void GenerateVerts();
+
+	void GenerateIndicies();
+
+
+};

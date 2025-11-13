@@ -390,3 +390,98 @@ void SphereComponent::GenerateIndicies() {
     }
 
 }
+
+
+
+void NPlaneComponent::LoadModelData() {
+    GenerateVerts();
+    GenerateIndicies();
+
+}
+
+void NPlaneComponent::GenerateVerts() {
+    // Creates an nxn square of vertices
+
+
+    // Allocate array
+    verts.resize(numDivisions*numDivisions);
+    verts.clear();
+
+
+    float intervalSize = 1 / (numDivisions-1);
+
+    // For each row
+    for(uint32_t i = 0; i < numDivisions; i++){
+
+        // For each column
+        for(uint32_t j = 0; j < numDivisions; j++){
+
+            Vertex newVertex{};
+
+            newVertex.pos.x = i * intervalSize;
+            newVertex.pos.z = j * intervalSize;
+
+            newVertex.color.x = i * intervalSize;
+            newVertex.color.z = j * intervalSize;
+
+            newVertex.texCoord.x = i * intervalSize;
+            newVertex.texCoord.y = j * intervalSize;
+
+            verts.push_back(newVertex);
+
+        }
+    }
+
+}
+
+void NPlaneComponent::GenerateIndicies() {
+
+    indices.clear();
+    indices.resize((numDivisions-1)*(numDivisions-1)*12);
+
+    for(uint32_t i = 0; i < numDivisions-1; i++){
+
+
+        for(uint32_t j = 0; j < numDivisions-1; j++){
+
+            //Relevant Verts:
+
+            /*
+            
+               i,j - - - i+1, j
+                 |        |
+                 |        |
+                 |        |
+              i, j+1 - - - i+1, j+1
+
+            */
+
+
+            //Top Triangles
+
+            indices.push_back( (numDivisions * i) + j);
+            indices.push_back( (numDivisions * i) + j+1);
+            indices.push_back( (numDivisions * i+1) + j);
+
+            indices.push_back( (numDivisions * i+1) + j);
+            indices.push_back( (numDivisions * i+1) + j+1);
+            indices.push_back( (numDivisions * i) + j);
+
+
+            //Bottom Triangles
+
+            indices.push_back( (numDivisions * i) + j+1);
+            indices.push_back( (numDivisions * i) + j);
+            indices.push_back( (numDivisions * i+1) + j);
+
+            indices.push_back( (numDivisions * i+1) + j+1);
+            indices.push_back( (numDivisions * i+1) + j);
+            indices.push_back( (numDivisions * i) + j);
+
+        }
+
+    }
+
+}
+
+
