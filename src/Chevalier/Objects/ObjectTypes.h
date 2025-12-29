@@ -51,6 +51,8 @@ struct GlobalDataObject {
     glm::mat4 projViewMat;
     glm::mat4 debugModelMat;
 
+    float timeSinceStart = 0;
+
 };
 
 struct ObjectShaderData {

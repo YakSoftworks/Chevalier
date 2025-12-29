@@ -78,6 +78,8 @@ void ChevalierRenderer::InitRenderer()
 
     //Debug:
 
+    //Bowling Scene
+
     //Setting Object Transforms
     MeshComponent* floor = new PlaneComponent();
     floor->renderObjectID = 1;
@@ -87,7 +89,7 @@ void ChevalierRenderer::InitRenderer()
     floor->LoadMeshComponent();
     RenderObjects.push_back(floor);
 
-    ////Ball
+    //////Ball
     MeshComponent* ball = new SphereComponent();
     ball->renderObjectID = 2;
     ball->componentTransform.position = glm::vec3(0.f, 2.f, 1.f);
@@ -96,7 +98,7 @@ void ChevalierRenderer::InitRenderer()
     ball->LoadMeshComponent();
     RenderObjects.push_back(ball);
 
-    ////Pin
+    //////Pin
     MeshComponent* pin1 = new CylinderComponent();
     pin1->renderObjectID = 3;
     pin1->componentTransform.position = glm::vec3(0.f, -2.f, 1.f);
@@ -132,7 +134,21 @@ void ChevalierRenderer::InitRenderer()
     pin3->pMaterial = myMaterial;
 
     
+    // N Plane Sim
 
+    /*MeshComponent* simPlane = new SphereComponent();
+    simPlane->renderObjectID = 7;
+    simPlane->componentTransform.position = glm::vec3(0.f, 0.f, 0.f);
+    simPlane->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
+    simPlane->componentTransform.scale = glm::vec3(1.f, 1.f, 1.f);
+    simPlane->LoadMeshComponent();
+    RenderObjects.push_back(simPlane);
+
+
+    ChevalierMaterial* SimMaterial = new ChevalierMaterial();
+    SimMaterial->init_pipeline(mRenderPass.getRenderPass());
+
+    simPlane->pMaterial = SimMaterial;*/
 
 }
 
@@ -183,14 +199,18 @@ void ChevalierRenderer::drawFrame()
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     GlobalDataObject globalDataThisFrame{};
-    globalDataThisFrame.viewMat = glm::lookAt(glm::vec3(-5.0f, -5.0f, -1.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
+    globalDataThisFrame.viewMat = glm::lookAt(glm::vec3(5, 0.0f, 0.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
     globalDataThisFrame.perspectiveMat = glm::perspective(
         glm::radians(45.f),
         ((float)CHEVALIER_WINDOW_WIDTH_DEFAULT / (float)CHEVALIER_WINDOW_HEIGHT_DEFAULT),
-        0.1f,
-        100.f
+        0.01f,
+        10000.f
     );
 
+    globalDataThisFrame.timeSinceStart = 1.f;
+
+    //CHEV_MESSAGE_LOG("Current Time: " << 2);
+     
     globalDataThisFrame.projViewMat = globalDataThisFrame.perspectiveMat * globalDataThisFrame.viewMat;
 
     globalDataThisFrame.debugModelMat = glm::rotate(glm::mat4(1.0f), time * glm::radians(15.0f), glm::vec3(0.0f, 0.0f, 1.0f));

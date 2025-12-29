@@ -9,7 +9,6 @@ layout(std140,binding = 0, set = 0) uniform GlobalDataObject {
     mat4 view;
     mat4 projViewMat;
     mat4 debugModelMat;
-    float timeSinceStart;
 } Globals;
 
 struct ObjectData{
@@ -31,18 +30,18 @@ layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
 
+    // Set Y to our value
 
-    float currentPower = Globals.timeSinceStart;
-
-    vec3 pos = inPosition;
-
-    float distance = pow( pow(pos.x, 0) + pow(pos.y, 0) + pow(pos.z, 0) , 0);
+    inPosition.y = (x**2) + (z**2)
 
     ObjectData thisObjectData = PerObjectData.objectArray[PushConstants.objectID];
 
-    gl_Position = Globals.projViewMat * thisObjectData.model * vec4(normalize(inPosition)*distance, 1.0f);
-
+    gl_Position = Globals.projViewMat * thisObjectData.model * vec4(inPosition, 1.0f);
+  
     fragColor = inColor;
     fragTexCoord = inTexCoord;
+
+
+
 
 }
