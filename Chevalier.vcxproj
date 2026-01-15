@@ -132,14 +132,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Chevalier.cpp" />
+    <ClCompile Include="src\Chevalier\Objects\Lighting\LightingManager.cpp" />
+    <ClCompile Include="src\Chevalier\Objects\Lighting\Lights.cpp" />
     <ClCompile Include="src\Chevalier\ChevalierInstance.cpp" />
     <ClCompile Include="src\Chevalier\ChevalierRenderer.cpp" />
     <ClCompile Include="src\Chevalier\HelperObjects\ChevalierObjects.cpp" />
+    <ClCompile Include="src\Chevalier\HelperObjects\MathTypes.cpp" />
     <ClCompile Include="src\Chevalier\HelperObjects\VulkanObjects.cpp" />
+    <ClCompile Include="src\Chevalier\Objects\Components\Component.cpp" />
     <ClCompile Include="src\Chevalier\Objects\Components\MeshComponent.cpp" />
     <ClCompile Include="src\Chevalier\Objects\Materials\ChevalierMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Chevalier\Objects\Lighting\LightingManager.h" />
+    <ClInclude Include="src\Chevalier\Objects\Lighting\Lights.h" />
     <ClInclude Include="src\Chevalier\ChevalierConsole.h" />
     <ClInclude Include="src\Chevalier\ChevalierConstants.h" />
     <ClInclude Include="src\Chevalier\ChevalierGraphicsCore.h" />
@@ -148,6 +154,7 @@
     <ClInclude Include="src\Chevalier\ChevalierRenderer.h" />
     <ClInclude Include="src\Chevalier\Core.h" />
     <ClInclude Include="src\Chevalier\HelperObjects\ChevalierObjects.h" />
+    <ClInclude Include="src\Chevalier\HelperObjects\MathTypes.h" />
     <ClInclude Include="src\Chevalier\HelperObjects\VulkanObjects.h" />
     <ClInclude Include="src\Chevalier\Objects\Actor.h" />
     <ClInclude Include="src\Chevalier\Objects\BasicShapes.h" />
