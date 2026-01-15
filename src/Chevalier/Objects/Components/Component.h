@@ -7,6 +7,13 @@
 class Component{
 
     
+
+protected:
+
+    virtual void PreInitializeComponent();
+    virtual void InitializeComponent(); // Register component
+    virtual void PostInitializeComponent();
+
     //Core Realtime Functions - Override for usage
 public:
     virtual void BeginPlay() {}; // Called whenever object is spawned
