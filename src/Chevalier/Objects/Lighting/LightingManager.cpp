@@ -69,3 +69,21 @@ uint32_t LightingManager::RegisterLightObject(LightSourceType LightType, LightCo
     CHEV_MESSAGE_ERROR("FAILED TO CATCH AND RETURN INDEX - LIGHTING MANAGER");
     return -1;
 }
+
+void LightingManager::UpdateAllLights()
+{
+
+    for (LightComponent* Light : LightSourceComponents) {
+
+        
+
+    }
+    
+}
+
+void LightingManager::SendBufferObjectInfo(LightSourceType LightType, uint32_t index, const LightBufferObject& newBufferObject)
+{
+
+
+
+}

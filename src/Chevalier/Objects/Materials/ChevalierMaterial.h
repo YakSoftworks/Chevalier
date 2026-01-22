@@ -5,6 +5,8 @@
 
 #include "Objects/ObjectTypes.h"
 
+class RenderPassManager;
+
 struct MaterialCreateInfo {
 
 	//Filepaths to shaders
@@ -96,7 +98,7 @@ public:
 	~ChevalierMaterial() {};
 
 	// Init with data from the renderer
-	void init_pipeline(VkRenderPass renderPass);
+	void init_pipeline(RenderPassManager* renderPass);
 
 
 	//ChevalierMaterialInterface Implementation - Means we are bindable
@@ -118,7 +120,7 @@ protected:
 
 
 	void createPipelineLayout();
-	void createPipeline(VkRenderPass renderPass);
+	void createPipeline(RenderPassManager* renderPass);
 
 	// Called in the destructor - Cleans up pipeline resources
 	void cleanup();

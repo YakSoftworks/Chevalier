@@ -2,6 +2,13 @@
 
 #include "Objects/Materials/ChevalierMaterial.h"
 
+#include "RenderPassManager.h"
+
+// Types of render passes
+#include "RenderPassPipelines/UnlitRenderPass.h"
+#include "RenderPassPipelines/WireframeRenderPass.h"
+
+
 //DEBUG
 #include "Objects/Components/MeshComponent.h"
 
@@ -12,7 +19,11 @@ void ChevalierRenderer::InitRenderer()
 	SwapChainManager::createImageViews();
 
 	// RenderPass
-	mRenderPass.CreateRenderPass(SwapChainManager::getSwapchainImageFormat());
+	//mRenderPass.CreateRenderPass(SwapChainManager::getSwapchainImageFormat());
+
+    //mRenderPassManager = new UnlitRenderPass();
+    mRenderPassManager = new WireframeRenderPass();
+    mRenderPassManager->GetRenderPassRef();
 
 	// Command Pool
 	VulkanCommandPool::getCommandPool();
@@ -25,7 +36,7 @@ void ChevalierRenderer::InitRenderer()
 
 
 	// Framebuffer
-	ChevFramebuffer::InitFramebuffers(mColorResources.colorImageView, mDepthResources.depthImageView, mRenderPass.getRenderPass());
+	ChevFramebuffer::InitFramebuffers(mColorResources.colorImageView, mDepthResources.depthImageView, mRenderPassManager->GetRenderPassRef());
 	
 
 
@@ -124,8 +135,13 @@ void ChevalierRenderer::InitRenderer()
     RenderObjects.push_back(pin3);
 
 
+    LightComponent* light1 = new PointLightComponent();
+    light1->componentTransform.position = glm::vec3(0.f, 4.f, 0.f);
+    light1->mLightInfo.color = glm::vec4(0.f, 0.f, 1.f, 1.f);
+
+
     ChevalierMaterial* myMaterial = new ChevalierMaterial();
-    myMaterial->init_pipeline(mRenderPass.getRenderPass());
+    myMaterial->init_pipeline(mRenderPassManager);
 
     floor->pMaterial = myMaterial;
     ball->pMaterial = myMaterial;
@@ -284,7 +300,7 @@ void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer buffer, uint32_t ima
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = mRenderPass.getRenderPass();
+    renderPassInfo.renderPass = mRenderPassManager->GetRenderPassRef();
     renderPassInfo.framebuffer = SwapChainManager::getSwapChainFramebufferAt(imageIndex);;
 	
 
@@ -295,6 +311,8 @@ void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer buffer, uint32_t ima
     VkClearValue clearColor[2] = { {{0.0f, 0.0f, 0.0f, 1.0f}}, {1.0f, 0} };
     renderPassInfo.clearValueCount = 2;
     renderPassInfo.pClearValues = clearColor;
+
+    
 
     vkCmdBeginRenderPass(buffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -314,25 +332,11 @@ void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer buffer, uint32_t ima
     scissor.extent = SwapChainManager::getExtent();
     vkCmdSetScissor(buffer, 0, 1, &scissor);
 
-    //CHEV_MESSAGE_LOG("Draw Iteration");
+    // Draw Geometry
+    performGeometryPass(buffer);
 
-	// TODO: Record Objects
-
-    ObjectShaderData* PerObjectDataThisFrame = static_cast<ObjectShaderData*>(ChevalierMaterial::sGlobalDataManager.modelMatrixBuffersMapped[currentFrame]);
-
-	for( ChevalierRenderObjectInterface* object : RenderObjects){
-
-		if(object->IsObjectDrawable()) {
-			//ChevalierMaterialInterface* material = object->GetObjectMaterial();
-
-			// Bind Material
-            object->GetObjectMaterial()->BindMaterial(&buffer, currentFrame);
-			//draw Object
-
-			object->DrawObject(buffer, PerObjectDataThisFrame);
-
-		}
-	}
+    //// Says next subpass' commands are also in this buffer
+    //vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
 	// End Render Pass
@@ -370,9 +374,28 @@ void ChevalierRenderer::recreateWindowResources() {
 	mColorResources.CreateColorResources(width, height);
 	mDepthResources.CreateDepthResources(width, height);
 
-	ChevFramebuffer::InitFramebuffers(mColorResources.colorImageView, mDepthResources.depthImageView, mRenderPass.getRenderPass());
+	ChevFramebuffer::InitFramebuffers(mColorResources.colorImageView, mDepthResources.depthImageView, mRenderPassManager->GetRenderPassRef());
 
 
+}
+
+void ChevalierRenderer::performGeometryPass(VkCommandBuffer buffer)
+{
+    ObjectShaderData* PerObjectDataThisFrame = static_cast<ObjectShaderData*>(ChevalierMaterial::sGlobalDataManager.modelMatrixBuffersMapped[currentFrame]);
+
+    for (ChevalierRenderObjectInterface* object : RenderObjects) {
+
+        if (object->IsObjectDrawable()) {
+            //ChevalierMaterialInterface* material = object->GetObjectMaterial();
+
+            // Bind Material
+            object->GetObjectMaterial()->BindMaterial(&buffer, currentFrame);
+            //draw Object
+
+            object->DrawObject(buffer, PerObjectDataThisFrame);
+
+        }
+    }
 }
 
 bool ChevalierRenderer::CheckShouldClose() {

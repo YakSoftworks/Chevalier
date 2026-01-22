@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Objects/Components/Component.h"
-#include "HelperObjects/MathTypes.h"
 
 
 // Lighting Components for the different lighting types
@@ -53,12 +52,24 @@ protected:
 
 	// Component Implementation
 
+	virtual void PreInitializeComponent() override;
+	virtual void InitializeComponent() override;
+	virtual void PostInitializeComponent() override;
+
+
+	// Light Component Functions
+
+
 	void RegisterLightSource();
 	void UnregisterLightSource();
 
 
 	// Know what type of light you are!
 	LightSourceType LightType;
+
+public:
+
+	LightInfoBase mLightInfo;
 
 };
 
@@ -71,13 +82,25 @@ protected:
 
 class PointLightComponent : public LightComponent {
 
+public:
+	//Default Constructor
+	PointLightComponent();
+
 };
 
 class SpotLightComponent : public LightComponent {
 
+public:
+	//Default Constructor
+	SpotLightComponent();
+
 };
 
 class DirectionalLightComponent : public LightComponent {
+
+public:
+	//Default Constructor
+	DirectionalLightComponent();
 
 };
 

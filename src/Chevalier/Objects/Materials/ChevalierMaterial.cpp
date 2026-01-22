@@ -1,6 +1,8 @@
 #include "ChevalierMaterial.h"
 #include "Objects/ObjectTypes.h"
 
+#include "RenderPassManager.h"
+
 
 //Statics
 GlobalDescriptorSet ChevalierMaterial::sGlobalDataManager{};
@@ -26,7 +28,7 @@ void ChevalierMaterial::createPipelineLayout()
     }
 }
 
-void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
+void ChevalierMaterial::createPipeline(RenderPassManager* renderPass)
 {
 #pragma region Shader Modules
 
@@ -73,14 +75,18 @@ void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
     viewportState.scissorCount = 1;
 
     VkPipelineRasterizationStateCreateInfo rasterizer{};
-    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    /*rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    rasterizer.depthBiasEnable = VK_FALSE;
+    rasterizer.depthBiasEnable = VK_FALSE;*/
+
+    // Pull from custom setup
+    renderPass->GetPassRasterizationStateInfo(rasterizer);
+
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -134,7 +140,7 @@ void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
     pipelineInfo.pDynamicState = &dynamicState;
     pipelineInfo.pDepthStencilState = &depthCreateInfo;
     pipelineInfo.layout = pipelineLayout;
-    pipelineInfo.renderPass = renderPass;
+    pipelineInfo.renderPass = renderPass->GetRenderPassRef();
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
@@ -144,7 +150,7 @@ void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
 }
 
 
-void ChevalierMaterial::init_pipeline(VkRenderPass renderPass)
+void ChevalierMaterial::init_pipeline(RenderPassManager* renderPass)
 {
 
     createPipelineLayout();
@@ -292,7 +298,7 @@ void GlobalDescriptorSet::CreateDescriptorSets()
         VkDescriptorBufferInfo lightBufferInfo{};
         lightBufferInfo.buffer = lightingBuffers[i];
         lightBufferInfo.offset = 0;
-        lightBufferInfo.range = sizeof(LightShaderData) * CHEVALIER_CONSTANTS_INITIAL_LIGHTING_COUNT;
+        lightBufferInfo.range = sizeof(LightShaderData) * 10;
 
 
         std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
@@ -382,8 +388,7 @@ void GlobalDescriptorSet::createMemoryBuffers()
 
     // Lighting Data
 
-
-    bufferSize = sizeof(LightShaderData) * CHEVALIER_CONSTANTS_INITIAL_LIGHTING_COUNT;
+    bufferSize = sizeof(LightShaderData) * 10;
 
     lightingBuffers.resize(CHEVALIER_MAX_FRAMES_IN_FLIGHT);
     lightingBuffersMemory.resize(CHEVALIER_MAX_FRAMES_IN_FLIGHT);

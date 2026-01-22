@@ -6,7 +6,7 @@
 
 class LightingManager
 {
-
+public:
 	LightingManager();
 
 protected:

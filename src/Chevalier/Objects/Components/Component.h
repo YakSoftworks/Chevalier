@@ -28,7 +28,7 @@ public:
 // Component with a transform
 class SceneComponent : public Component {
 
-protected:
+public:
     //Owns a transform
     ModelTransform componentTransform;
 

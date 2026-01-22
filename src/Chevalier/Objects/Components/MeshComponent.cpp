@@ -337,6 +337,8 @@ void SphereComponent::GenerateVerts() {
             p1.color.y = static_cast<float>(sin(currentHeightRadians));
             p1.color.z = static_cast<float>(cos(currentHeightRadians));
 
+            p1.normal = p1.pos;
+
             //TODO: NORMALS
 
             //Submit Vert

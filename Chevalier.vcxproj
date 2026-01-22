@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -137,11 +137,14 @@
     <ClCompile Include="src\Chevalier\ChevalierInstance.cpp" />
     <ClCompile Include="src\Chevalier\ChevalierRenderer.cpp" />
     <ClCompile Include="src\Chevalier\HelperObjects\ChevalierObjects.cpp" />
-    <ClCompile Include="src\Chevalier\HelperObjects\MathTypes.cpp" />
     <ClCompile Include="src\Chevalier\HelperObjects\VulkanObjects.cpp" />
     <ClCompile Include="src\Chevalier\Objects\Components\Component.cpp" />
     <ClCompile Include="src\Chevalier\Objects\Components\MeshComponent.cpp" />
     <ClCompile Include="src\Chevalier\Objects\Materials\ChevalierMaterial.cpp" />
+    <ClCompile Include="src\Chevalier\RenderPassManager.cpp" />
+    <ClCompile Include="src\Chevalier\RenderPassPipelines\LitRenderPass.cpp" />
+    <ClCompile Include="src\Chevalier\RenderPassPipelines\UnlitRenderPass.cpp" />
+    <ClCompile Include="src\Chevalier\RenderPassPipelines\WireframeRenderPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Chevalier\Objects\Lighting\LightingManager.h" />
@@ -154,7 +157,6 @@
     <ClInclude Include="src\Chevalier\ChevalierRenderer.h" />
     <ClInclude Include="src\Chevalier\Core.h" />
     <ClInclude Include="src\Chevalier\HelperObjects\ChevalierObjects.h" />
-    <ClInclude Include="src\Chevalier\HelperObjects\MathTypes.h" />
     <ClInclude Include="src\Chevalier\HelperObjects\VulkanObjects.h" />
     <ClInclude Include="src\Chevalier\Objects\Actor.h" />
     <ClInclude Include="src\Chevalier\Objects\BasicShapes.h" />
@@ -164,6 +166,10 @@
     <ClInclude Include="src\Chevalier\Objects\Map.h" />
     <ClInclude Include="src\Chevalier\Objects\Materials\ChevalierMaterial.h" />
     <ClInclude Include="src\Chevalier\Objects\ObjectTypes.h" />
+    <ClInclude Include="src\Chevalier\RenderPassManager.h" />
+    <ClInclude Include="src\Chevalier\RenderPassPipelines\LitRenderPass.h" />
+    <ClInclude Include="src\Chevalier\RenderPassPipelines\UnlitRenderPass.h" />
+    <ClInclude Include="src\Chevalier\RenderPassPipelines\WireframeRenderPass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

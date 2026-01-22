@@ -42,10 +42,19 @@
     <ClCompile Include="src\Chevalier\Objects\Components\Component.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Chevalier\HelperObjects\MathTypes.cpp">
+    <ClCompile Include="src\Chevalier\Objects\Lighting\LightingManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Chevalier\Objects\Lighting\LightingManager.cpp">
+    <ClCompile Include="src\Chevalier\RenderPassManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Chevalier\RenderPassPipelines\UnlitRenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Chevalier\RenderPassPipelines\LitRenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Chevalier\RenderPassPipelines\WireframeRenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -104,10 +113,19 @@
     <ClInclude Include="src\Chevalier\Objects\Lighting\Lights.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Chevalier\HelperObjects\MathTypes.h">
+    <ClInclude Include="src\Chevalier\Objects\Lighting\LightingManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Chevalier\Objects\Lighting\LightingManager.h">
+    <ClInclude Include="src\Chevalier\RenderPassManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chevalier\RenderPassPipelines\UnlitRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chevalier\RenderPassPipelines\LitRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chevalier\RenderPassPipelines\WireframeRenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
