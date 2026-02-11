@@ -28,15 +28,10 @@ void ChevalierMaterial::createPipelineLayout()
     }
 }
 
-void ChevalierMaterial::createPipeline(RenderPassManager* renderPass)
+void ChevalierMaterial::createPipeline(RenderPassManager* renderPass, VkShaderModule vertShaderModule, VkShaderModule fragShaderModule, uint32_t subpass)
 {
+
 #pragma region Shader Modules
-
-    auto vertShaderCode = FileReader::readFile("content/shaders/ChevalierII/basicVert.spv");
-    auto fragShaderCode = FileReader::readFile("content/shaders/ChevalierII/basicFrag.spv");
-
-    VkShaderModule vertShaderModule = ChevalierMaterial::createShaderModule(vertShaderCode);
-    VkShaderModule fragShaderModule = ChevalierMaterial::createShaderModule(fragShaderCode);
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -51,6 +46,7 @@ void ChevalierMaterial::createPipeline(RenderPassManager* renderPass)
     fragShaderStageInfo.pName = "main";
 
     VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+
 #pragma endregion
 
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
@@ -68,6 +64,7 @@ void ChevalierMaterial::createPipeline(RenderPassManager* renderPass)
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     inputAssembly.primitiveRestartEnable = VK_FALSE;
+
 
     VkPipelineViewportStateCreateInfo viewportState{};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -116,7 +113,6 @@ void ChevalierMaterial::createPipeline(RenderPassManager* renderPass)
     depthCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
     depthCreateInfo.depthBoundsTestEnable = VK_FALSE;
 
-
     std::vector<VkDynamicState> dynamicStates = {
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR
@@ -141,21 +137,25 @@ void ChevalierMaterial::createPipeline(RenderPassManager* renderPass)
     pipelineInfo.pDepthStencilState = &depthCreateInfo;
     pipelineInfo.layout = pipelineLayout;
     pipelineInfo.renderPass = renderPass->GetRenderPassRef();
-    pipelineInfo.subpass = 0;
+    pipelineInfo.subpass = subpass;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-    if (vkCreateGraphicsPipelines(VulkanLogicalDevice::getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS) {
+
+    VkResult result = vkCreateGraphicsPipelines(VulkanLogicalDevice::getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline);
+
+    if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
+
 }
 
 
-void ChevalierMaterial::init_pipeline(RenderPassManager* renderPass)
+void ChevalierMaterial::init_pipeline(RenderPassManager* renderPass, VkShaderModule vertShaderModule, VkShaderModule fragShaderModule, uint32_t subpass)
 {
 
     createPipelineLayout();
 
-    createPipeline(renderPass);
+    createPipeline(renderPass, vertShaderModule, fragShaderModule, subpass);
 
 }
 
@@ -298,7 +298,7 @@ void GlobalDescriptorSet::CreateDescriptorSets()
         VkDescriptorBufferInfo lightBufferInfo{};
         lightBufferInfo.buffer = lightingBuffers[i];
         lightBufferInfo.offset = 0;
-        lightBufferInfo.range = sizeof(LightShaderData) * 10;
+        lightBufferInfo.range = sizeof(LightShaderInfo) * CHEVALIER_CONSTANTS_INITIAL_LIGHTING_COUNT;
 
 
         std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
@@ -388,7 +388,7 @@ void GlobalDescriptorSet::createMemoryBuffers()
 
     // Lighting Data
 
-    bufferSize = sizeof(LightShaderData) * 10;
+    bufferSize = sizeof(LightShaderInfo) * CHEVALIER_CONSTANTS_INITIAL_LIGHTING_COUNT;
 
     lightingBuffers.resize(CHEVALIER_MAX_FRAMES_IN_FLIGHT);
     lightingBuffersMemory.resize(CHEVALIER_MAX_FRAMES_IN_FLIGHT);

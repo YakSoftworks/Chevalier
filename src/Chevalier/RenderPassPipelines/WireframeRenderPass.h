@@ -19,7 +19,7 @@ class WireframeRenderPass : public RenderPassManager
 
 	}
 
-	virtual void RecordRenderPass(VkCommandBuffer buffer) override;
+	virtual void RecordRenderPass(VkCommandBuffer buffer, uint32_t imageIndex) override;
 
 	virtual VkRenderPass GetRenderPassRef() override;
 

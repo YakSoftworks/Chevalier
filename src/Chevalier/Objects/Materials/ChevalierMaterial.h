@@ -98,7 +98,7 @@ public:
 	~ChevalierMaterial() {};
 
 	// Init with data from the renderer
-	void init_pipeline(RenderPassManager* renderPass);
+	void init_pipeline(RenderPassManager* renderPass, VkShaderModule vertShaderModule, VkShaderModule fragShaderModule, uint32_t subpass);
 
 
 	//ChevalierMaterialInterface Implementation - Means we are bindable
@@ -114,13 +114,14 @@ public:
 	static GlobalDescriptorSet sGlobalDataManager;
 	static void UpdateGlobalDescriptor(GlobalDataObject* newGlobalData, uint32_t currentFrame);
 
-protected:
+public:
 
 	static VkShaderModule createShaderModule(const std::vector<char>& code);
 
+protected:
 
 	void createPipelineLayout();
-	void createPipeline(RenderPassManager* renderPass);
+	virtual void createPipeline(RenderPassManager* renderPass, VkShaderModule vertShaderModule, VkShaderModule fragShaderModule, uint32_t subpass);
 
 	// Called in the destructor - Cleans up pipeline resources
 	void cleanup();

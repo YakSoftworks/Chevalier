@@ -8,7 +8,7 @@ class Component{
 
     
 
-protected:
+public:
 
     virtual void PreInitializeComponent();
     virtual void InitializeComponent(); // Register component

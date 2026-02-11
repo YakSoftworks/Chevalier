@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Chevalier.cpp" />
+    <ClCompile Include="src\Chevalier\Objects\GeometryManager.cpp" />
     <ClCompile Include="src\Chevalier\Objects\Lighting\LightingManager.cpp" />
     <ClCompile Include="src\Chevalier\Objects\Lighting\Lights.cpp" />
     <ClCompile Include="src\Chevalier\ChevalierInstance.cpp" />
@@ -147,6 +148,7 @@
     <ClCompile Include="src\Chevalier\RenderPassPipelines\WireframeRenderPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Chevalier\Objects\GeometryManager.h" />
     <ClInclude Include="src\Chevalier\Objects\Lighting\LightingManager.h" />
     <ClInclude Include="src\Chevalier\Objects\Lighting\Lights.h" />
     <ClInclude Include="src\Chevalier\ChevalierConsole.h" />

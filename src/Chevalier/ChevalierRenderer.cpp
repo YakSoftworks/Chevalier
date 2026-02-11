@@ -7,6 +7,7 @@
 // Types of render passes
 #include "RenderPassPipelines/UnlitRenderPass.h"
 #include "RenderPassPipelines/WireframeRenderPass.h"
+#include "RenderPassPipelines/LitRenderPass.h"
 
 
 //DEBUG
@@ -22,22 +23,18 @@ void ChevalierRenderer::InitRenderer()
 	//mRenderPass.CreateRenderPass(SwapChainManager::getSwapchainImageFormat());
 
     //mRenderPassManager = new UnlitRenderPass();
-    mRenderPassManager = new WireframeRenderPass();
+    mRenderPassManager = new LitRenderPass();
+    //mRenderPassManager = new WireframeRenderPass();
     mRenderPassManager->GetRenderPassRef();
+
+    mRenderPassManager->InitializeRP();
 
 	// Command Pool
 	VulkanCommandPool::getCommandPool();
 
-    // Depth Resources
-    mDepthResources.CreateDepthResources(CHEVALIER_WINDOW_WIDTH_DEFAULT, CHEVALIER_WINDOW_HEIGHT_DEFAULT);
-
-    // Color Resources
-    mColorResources.CreateColorResources(CHEVALIER_WINDOW_WIDTH_DEFAULT, CHEVALIER_WINDOW_HEIGHT_DEFAULT);
-
-
 	// Framebuffer
-	ChevFramebuffer::InitFramebuffers(mColorResources.colorImageView, mDepthResources.depthImageView, mRenderPassManager->GetRenderPassRef());
-	
+	//ChevFramebuffer::InitFramebuffers(mColorResources.colorImageView, mDepthResources.depthImageView,mNormalResources.colorImageView, mRenderPassManager->GetRenderPassRef());
+    mRenderPassManager->InitFramebuffer();
 
 
 
@@ -98,7 +95,7 @@ void ChevalierRenderer::InitRenderer()
     floor->componentTransform.rotation = glm::vec3(0.f, 90.f, 90.f);
     floor->componentTransform.scale = glm::vec3(7.f, 1.f, 5.f);
     floor->LoadMeshComponent();
-    RenderObjects.push_back(floor);
+    floor->InitializeComponent();
 
     //////Ball
     MeshComponent* ball = new SphereComponent();
@@ -107,7 +104,7 @@ void ChevalierRenderer::InitRenderer()
     ball->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
     ball->componentTransform.scale = glm::vec3(.5f, .5f, .5f);
     ball->LoadMeshComponent();
-    RenderObjects.push_back(ball);
+    ball->InitializeComponent();
 
     //////Pin
     MeshComponent* pin1 = new CylinderComponent();
@@ -116,7 +113,7 @@ void ChevalierRenderer::InitRenderer()
     pin1->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
     pin1->componentTransform.scale = glm::vec3(.25f, .25f, .5f);
     pin1->LoadMeshComponent();
-    RenderObjects.push_back(pin1);
+    pin1->InitializeComponent();
 
     MeshComponent* pin2 = new CylinderComponent();
     pin2->renderObjectID = 4;
@@ -124,7 +121,7 @@ void ChevalierRenderer::InitRenderer()
     pin2->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
     pin2->componentTransform.scale = glm::vec3(.25f, .25f, .5f);
     pin2->LoadMeshComponent();
-    RenderObjects.push_back(pin2);
+    pin2->InitializeComponent();
 
     MeshComponent* pin3 = new CylinderComponent();
     pin3->renderObjectID = 5;
@@ -132,16 +129,19 @@ void ChevalierRenderer::InitRenderer()
     pin3->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
     pin3->componentTransform.scale = glm::vec3(.25f, .25f, .5f);
     pin3->LoadMeshComponent();
-    RenderObjects.push_back(pin3);
+    pin3->InitializeComponent();
 
 
     LightComponent* light1 = new PointLightComponent();
     light1->componentTransform.position = glm::vec3(0.f, 4.f, 0.f);
     light1->mLightInfo.color = glm::vec4(0.f, 0.f, 1.f, 1.f);
+    light1->InitializeComponent();
 
+    VkShaderModule vertShaderModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/basicVert.spv"));
+    VkShaderModule fragShaderModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/basicFrag.spv"));
 
     ChevalierMaterial* myMaterial = new ChevalierMaterial();
-    myMaterial->init_pipeline(mRenderPassManager);
+    myMaterial->init_pipeline(mRenderPassManager, vertShaderModule, fragShaderModule, 0);
 
     floor->pMaterial = myMaterial;
     ball->pMaterial = myMaterial;
@@ -234,6 +234,10 @@ void ChevalierRenderer::drawFrame()
     ChevalierMaterial::UpdateGlobalDescriptor(&globalDataThisFrame, currentFrame);
 
 
+    // Update lights
+    mLightManager.UpdateLightBuffer(static_cast<LightShaderInfo*>(ChevalierMaterial::sGlobalDataManager.lightingBuffersMapped[currentFrame]));
+
+
 	// Record Command Buffer
 	recordCommandBuffer(mCommandBuffers.getCommandBufferAt(currentFrame), imageIndex);
 
@@ -295,52 +299,7 @@ void ChevalierRenderer::recordCommandBuffer(VkCommandBuffer buffer, uint32_t ima
         throw std::runtime_error("failed to begin recording command buffer!");
     }
 
-
-	// Begin Render Pass
-
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = mRenderPassManager->GetRenderPassRef();
-    renderPassInfo.framebuffer = SwapChainManager::getSwapChainFramebufferAt(imageIndex);;
-	
-
-
-    renderPassInfo.renderArea.offset = { 0, 0 };
-    renderPassInfo.renderArea.extent = SwapChainManager::getExtent();
-
-    VkClearValue clearColor[2] = { {{0.0f, 0.0f, 0.0f, 1.0f}}, {1.0f, 0} };
-    renderPassInfo.clearValueCount = 2;
-    renderPassInfo.pClearValues = clearColor;
-
-    
-
-    vkCmdBeginRenderPass(buffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-	// Set Viewport/Scissor/etc
-
-	VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = (float)SwapChainManager::getExtent().width;
-    viewport.height = (float)SwapChainManager::getExtent().height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(buffer, 0, 1, &viewport);
-
-    VkRect2D scissor{};
-    scissor.offset = { 0, 0 };
-    scissor.extent = SwapChainManager::getExtent();
-    vkCmdSetScissor(buffer, 0, 1, &scissor);
-
-    // Draw Geometry
-    performGeometryPass(buffer);
-
-    //// Says next subpass' commands are also in this buffer
-    //vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
-
-
-	// End Render Pass
-	vkCmdEndRenderPass(buffer);
+    mRenderPassManager->RecordRenderPass(buffer, imageIndex);
 
 	// End Command Buffer
     if (vkEndCommandBuffer(buffer) != VK_SUCCESS) {
@@ -366,36 +325,19 @@ void ChevalierRenderer::recreateWindowResources() {
     SwapChainManager::createImageViews();
 
 	// Cleanup our swapchain dependent resources
-	mColorResources.cleanup();
+	/*mColorResources.cleanup();
 	mDepthResources.cleanup();
+    mNormalResources.cleanup();*/
 
 
 	// Recreate Resources
-	mColorResources.CreateColorResources(width, height);
+	/*mColorResources.CreateColorResources(width, height);
 	mDepthResources.CreateDepthResources(width, height);
+    mNormalResources.CreateColorResources(width, height);*/
 
-	ChevFramebuffer::InitFramebuffers(mColorResources.colorImageView, mDepthResources.depthImageView, mRenderPassManager->GetRenderPassRef());
+	/*ChevFramebuffer::InitFramebuffers(mColorResources.colorImageView, mDepthResources.depthImageView,mColorResources.colorImageView, mRenderPassManager->GetRenderPassRef());*/
 
 
-}
-
-void ChevalierRenderer::performGeometryPass(VkCommandBuffer buffer)
-{
-    ObjectShaderData* PerObjectDataThisFrame = static_cast<ObjectShaderData*>(ChevalierMaterial::sGlobalDataManager.modelMatrixBuffersMapped[currentFrame]);
-
-    for (ChevalierRenderObjectInterface* object : RenderObjects) {
-
-        if (object->IsObjectDrawable()) {
-            //ChevalierMaterialInterface* material = object->GetObjectMaterial();
-
-            // Bind Material
-            object->GetObjectMaterial()->BindMaterial(&buffer, currentFrame);
-            //draw Object
-
-            object->DrawObject(buffer, PerObjectDataThisFrame);
-
-        }
-    }
 }
 
 bool ChevalierRenderer::CheckShouldClose() {

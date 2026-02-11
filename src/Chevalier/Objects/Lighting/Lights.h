@@ -16,39 +16,19 @@ enum LightSourceType : uint8_t
 	DirectionalLight
 };
 
-struct LightInfoBase {
+struct LightShaderInfo {
 
-	glm::vec4 position;
+	int lightType;
+	glm::mat4 lightTransform;
 	glm::vec4 color;
-	glm::vec4 direction;
 	glm::vec2 info;
-
-};
-
-struct LightBufferObject {
-
-	uint32_t numPointLights;
-	uint32_t maxPointLights = CHEVALIER_CONSTANTS_MAX_POINT_LIGHTS;
-
-	uint32_t numSpotLights;
-	uint32_t maxSpotLights = CHEVALIER_CONSTANTS_MAX_SPOT_LIGHTS;
-
-	uint32_t numDirectionalLights;
-	uint32_t maxDirectionalLights = CHEVALIER_CONSTANTS_MAX_DIRECTIONAL_LIGHTS;
-
-
-};
-
-struct LightSourceBufferObject {
-
-
 
 };
 
 // Base Class for Lighting Components
 class LightComponent : public SceneComponent {
 
-protected:
+public:
 
 	// Component Implementation
 
@@ -58,7 +38,7 @@ protected:
 
 
 	// Light Component Functions
-
+protected:
 
 	void RegisterLightSource();
 	void UnregisterLightSource();
@@ -69,7 +49,17 @@ protected:
 
 public:
 
-	LightInfoBase mLightInfo;
+	LightShaderInfo mLightInfo;
+
+	uint32_t lightSource_id;
+
+	virtual void UpdateLightBufferInfo(LightShaderInfo* lightDataArray);
+
+protected:
+
+	void getDefaultLightInformation(LightShaderInfo& lightData);
+
+	void submitLightInformation(const LightShaderInfo& lightData, LightShaderInfo* shaderInfoArray);
 
 };
 
@@ -86,6 +76,8 @@ public:
 	//Default Constructor
 	PointLightComponent();
 
+	virtual void UpdateLightBufferInfo(LightShaderInfo* lightDataArray) override;
+
 };
 
 class SpotLightComponent : public LightComponent {
@@ -94,6 +86,8 @@ public:
 	//Default Constructor
 	SpotLightComponent();
 
+	virtual void UpdateLightBufferInfo(LightShaderInfo* lightDataArray) override;
+
 };
 
 class DirectionalLightComponent : public LightComponent {
@@ -101,6 +95,8 @@ class DirectionalLightComponent : public LightComponent {
 public:
 	//Default Constructor
 	DirectionalLightComponent();
+
+	virtual void UpdateLightBufferInfo(LightShaderInfo* lightDataArray) override;
 
 };
 

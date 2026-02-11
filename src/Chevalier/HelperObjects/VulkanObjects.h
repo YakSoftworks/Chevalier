@@ -156,9 +156,6 @@ public:
 
 struct SwapChainManager {
 
-protected:
-
-	friend struct ChevFramebuffer;
 
 	//Handle to the SwapChain
 	static VkSwapchainKHR swapchain;

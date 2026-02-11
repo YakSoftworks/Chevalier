@@ -53,6 +53,8 @@ struct GlobalDataObject {
 
     float timeSinceStart = 0;
 
+    int numLights;
+
 };
 
 struct ObjectShaderData {

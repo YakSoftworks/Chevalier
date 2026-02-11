@@ -72,7 +72,7 @@ public:
 
 struct ChevFramebuffer {
 
-	static void InitFramebuffers(VkImageView colorImageView, VkImageView depthImageView, VkRenderPass renderPass);
+	static void InitFramebuffers(VkImageView colorImageView, VkImageView depthImageView, VkImageView normalImage, VkRenderPass renderPass);
 
     static void Cleanup(VkFramebuffer framebuffer);
 
@@ -159,31 +159,3 @@ struct FileReader {
     }
 };
 
-struct ChevalierSubpassInfo {
-
-    ChevalierSubpassInfo();
-
-    VkSubpassDependency subpassDependency;
-    VkSubpassDescription subpass;
-
-
-};
-
-struct ChevalierRenderPassInfo {
-
-
-};
-
-
-struct ChevalierRenderPass {
-
-public:
-
-    virtual void CreateRenderPass() {};
-
-protected:
-
-
-
-
-};

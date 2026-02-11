@@ -57,6 +57,9 @@
     <ClCompile Include="src\Chevalier\RenderPassPipelines\WireframeRenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Chevalier\Objects\GeometryManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Chevalier\ChevalierInstance.h">
@@ -126,6 +129,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Chevalier\RenderPassPipelines\WireframeRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chevalier\Objects\GeometryManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

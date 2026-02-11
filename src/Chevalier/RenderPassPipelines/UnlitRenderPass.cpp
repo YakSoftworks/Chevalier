@@ -92,3 +92,53 @@ VkRenderPass UnlitRenderPass::GetRenderPassRef()
     }
     return mRenderPass;
 }
+
+void UnlitRenderPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageIndex)
+{
+
+    // Begin Render Pass
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = GetRenderPassRef();
+    renderPassInfo.framebuffer = SwapChainManager::getSwapChainFramebufferAt(imageIndex);;
+
+
+
+    renderPassInfo.renderArea.offset = { 0, 0 };
+    renderPassInfo.renderArea.extent = SwapChainManager::getExtent();
+
+    VkClearValue clearColor[2] = { {{0.0f, 0.0f, 0.0f, 1.0f}}, {1.0f, 0} };
+    renderPassInfo.clearValueCount = 2;
+    renderPassInfo.pClearValues = clearColor;
+
+
+
+    vkCmdBeginRenderPass(buffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    // Set Viewport/Scissor/etc
+
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = (float)SwapChainManager::getExtent().width;
+    viewport.height = (float)SwapChainManager::getExtent().height;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(buffer, 0, 1, &viewport);
+
+    VkRect2D scissor{};
+    scissor.offset = { 0, 0 };
+    scissor.extent = SwapChainManager::getExtent();
+    vkCmdSetScissor(buffer, 0, 1, &scissor);
+
+    // Draw Geometry
+    GeometryManager::getGeometryManager()->PerformGeometryPass(buffer, imageIndex);
+
+    //// Says next subpass' commands are also in this buffer
+    //vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
+
+
+    // End Render Pass
+    vkCmdEndRenderPass(buffer);
+}

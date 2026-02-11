@@ -26,12 +26,40 @@ void LightComponent::PostInitializeComponent()
 
 void LightComponent::RegisterLightSource()
 {
-	LightingManager::GetLightingManager()->RegisterLightObject(LightType, this);
+	lightSource_id = LightingManager::GetLightingManager()->RegisterLightObject(LightType, this);
 }
 
 void LightComponent::UnregisterLightSource()
 {
 	// Uhhhh, lets not worry about that yet!
+}
+
+void LightComponent::UpdateLightBufferInfo(LightShaderInfo* lightDataArray)
+{
+	LightShaderInfo lightData{};
+	
+	getDefaultLightInformation(lightData);
+
+	submitLightInformation(lightData, lightDataArray);
+
+}
+
+void LightComponent::getDefaultLightInformation(LightShaderInfo& lightData)
+{
+
+	lightData.lightTransform = componentTransform.getTransform();
+
+	lightData.color = { 1.f, 1.f, 1.f, 1.f };
+
+	lightData.lightType = LightType;
+
+}
+
+void LightComponent::submitLightInformation(const LightShaderInfo& lightData, LightShaderInfo* shaderInfoArray)
+{
+
+	shaderInfoArray[lightSource_id] = lightData;
+
 }
 
 #pragma endregion
@@ -41,6 +69,18 @@ PointLightComponent::PointLightComponent() {
 
 	//Sets our light type
 	LightType = PointLight;
+
+}
+
+void PointLightComponent::UpdateLightBufferInfo(LightShaderInfo* lightDataArray)
+{
+	LightShaderInfo lightData{};
+
+	getDefaultLightInformation(lightData);
+
+	// Do custom adjustments
+
+	submitLightInformation(lightData, lightDataArray);
 
 }
 
@@ -54,6 +94,17 @@ SpotLightComponent::SpotLightComponent() {
 
 }
 
+void SpotLightComponent::UpdateLightBufferInfo(LightShaderInfo* lightDataArray)
+{
+	LightShaderInfo lightData{};
+
+	getDefaultLightInformation(lightData);
+
+	// Do custom adjustments
+
+	submitLightInformation(lightData, lightDataArray);
+}
+
 #pragma endregion
 #pragma region Directional Lights
 
@@ -62,4 +113,16 @@ DirectionalLightComponent::DirectionalLightComponent() {
 	//Sets our light type
 	LightType = DirectionalLight;
 
+}
+
+void DirectionalLightComponent::UpdateLightBufferInfo(LightShaderInfo* lightDataArray)
+{
+	LightShaderInfo lightData{};
+
+	getDefaultLightInformation(lightData);
+
+	// Do custom adjustments
+	
+
+	submitLightInformation(lightData, lightDataArray);
 }

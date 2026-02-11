@@ -24,6 +24,10 @@ public:
 
 
 
+	// Component Implementation
+	virtual void InitializeComponent() override;
+
+
 public:
 
 	void LoadMeshComponent();

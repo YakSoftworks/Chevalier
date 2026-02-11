@@ -119,7 +119,7 @@ void SyncObjects::createSyncObjects()
 
 #pragma region ChevFrameBuffers
 
-void ChevFramebuffer::InitFramebuffers(VkImageView colorImageView, VkImageView depthImageView, VkRenderPass renderPass)
+void ChevFramebuffer::InitFramebuffers(VkImageView colorImageView, VkImageView depthImageView, VkImageView normalImageView, VkRenderPass renderPass)
 {
     SwapChainManager::swapchainFramebuffers.resize(SwapChainManager::swapchainImageViews.size());
 
@@ -127,6 +127,7 @@ void ChevFramebuffer::InitFramebuffers(VkImageView colorImageView, VkImageView d
 
         VkImageView attachments[] = {
             colorImageView,
+            normalImageView,
             depthImageView,
             SwapChainManager::swapchainImageViews[i]
         };
@@ -134,7 +135,7 @@ void ChevFramebuffer::InitFramebuffers(VkImageView colorImageView, VkImageView d
         VkFramebufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         bufferInfo.renderPass = renderPass;
-        bufferInfo.attachmentCount = 3;
+        bufferInfo.attachmentCount = 4;
         bufferInfo.pAttachments = attachments;
         bufferInfo.width = SwapChainManager::swapchainExtent.width;
         bufferInfo.height = SwapChainManager::swapchainExtent.height;

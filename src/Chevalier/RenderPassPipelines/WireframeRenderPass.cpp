@@ -1,6 +1,6 @@
 #include "WireframeRenderPass.h"
 
-void WireframeRenderPass::RecordRenderPass(VkCommandBuffer buffer)
+void WireframeRenderPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageIndex)
 {
 	// Do a single geometry pass
 

@@ -2,6 +2,8 @@
 
 #include "ChevalierGraphicsCore.h"
 
+#include "Objects/Lighting/\LightingManager.h"
+#include "Objects/GeometryManager.h"
 
 
 class RenderPassManager
@@ -50,10 +52,24 @@ public:
 		return 0;
 	}
 
-	virtual void RecordRenderPass(VkCommandBuffer buffer) 
+
+	virtual void InitializeRP() {}
+
+	virtual void RecordRenderPass(VkCommandBuffer buffer, uint32_t imageIndex)
 	{
 		// Default - Do nothing
 	}
+
+	void InitFramebuffer() { CreateFrameBuffers(); }
+
+protected:
+
+	std::array<VkFramebuffer, CHEVALIER_MAX_FRAMES_IN_FLIGHT> mFramebuffers;
+
+	virtual void CreateFrameBuffers() {};
+
+
+	virtual void InitRenderPipelineResources() {};
 
 };
 
