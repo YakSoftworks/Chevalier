@@ -21,7 +21,7 @@ VkRenderPass LitRenderPass::GetRenderPassRef()
         finalColorAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         finalColorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        finalColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        finalColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         finalColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
         finalColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -54,7 +54,7 @@ VkRenderPass LitRenderPass::GetRenderPassRef()
         albedoAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         albedoAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-        albedoAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        albedoAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         albedoAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
         albedoAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -69,7 +69,7 @@ VkRenderPass LitRenderPass::GetRenderPassRef()
         normalAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         normalAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
         normalAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -86,7 +86,7 @@ VkRenderPass LitRenderPass::GetRenderPassRef()
 
         VkAttachmentReference geometryDepthAttachmentRef{};
         geometryDepthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
-        geometryDepthAttachmentRef.attachment = 2;
+        geometryDepthAttachmentRef.attachment = 1;
 
         VkAttachmentReference geometryPassColorAttachmentRefs[] = { geometryAlbedoAttachmentRef, geometryNormalAttachmentRef };
 
