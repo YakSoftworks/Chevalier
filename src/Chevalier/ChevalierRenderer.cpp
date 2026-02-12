@@ -193,7 +193,7 @@ void ChevalierRenderer::drawFrame()
 
 	vkWaitForFences(VulkanLogicalDevice::getLogicalDevice(), 1, &SyncObjects::inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-    uint32_t imageIndex;
+    uint32_t imageIndex = currentFrame;
     VkResult result = vkAcquireNextImageKHR(VulkanLogicalDevice::getLogicalDevice(), SwapChainManager::getSwapChain(), UINT64_MAX, SyncObjects::imageAvailableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -241,7 +241,7 @@ void ChevalierRenderer::drawFrame()
 
 
 	// Record Command Buffer
-	recordCommandBuffer(mCommandBuffers.getCommandBufferAt(currentFrame), imageIndex);
+	recordCommandBuffer(mCommandBuffers.getCommandBufferAt(currentFrame), currentFrame);
 
 
 	// Submit Buffer to Present Queue

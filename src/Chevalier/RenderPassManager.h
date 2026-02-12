@@ -17,6 +17,16 @@ class RenderPassManager
 
 protected:
 
+	static RenderPassManager* sRenderPassManager;
+
+public:
+
+	static RenderPassManager* getRenderPassManager() { return sRenderPassManager; }
+
+	virtual std::vector<VkImageView> getRenderPassImageViews() { return std::vector<VkImageView>(); }
+
+protected:
+
 	VkRenderPass mRenderPass;
 
 public:
@@ -70,6 +80,8 @@ protected:
 
 
 	virtual void InitRenderPipelineResources() {};
+
+	
 
 };
 

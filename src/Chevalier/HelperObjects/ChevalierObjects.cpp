@@ -87,6 +87,37 @@ void ColorResources::cleanup(){
 
 #pragma endregion
 
+#pragma region Normal Resources
+
+void NormalResources::CreateColorResources(uint32_t width, uint32_t height) {
+    VkFormat colorFormat = VK_FORMAT_A2B10G10R10_UNORM_PACK32;
+
+    ImageCreationInfo colorImageInfo{};
+    colorImageInfo.width = width;
+    colorImageInfo.height = height;
+    colorImageInfo.format = colorFormat;
+    colorImageInfo.mipLevel = 1;
+    colorImageInfo.numSamples = MSAAResources::getMSAASampleCount();
+    colorImageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    colorImageInfo.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    colorImageInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+    VulkanImage::createImage(colorImageInfo, colorImage, colorImageMemory);
+
+    colorImageView = VulkanImageView::CreateImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+        
+
+}
+
+void NormalResources::cleanup() {
+    VkDevice device = VulkanLogicalDevice::getLogicalDevice();
+    vkDestroyImage(device, colorImage, nullptr);
+    vkDestroyImageView(device, colorImageView, nullptr);
+    vkFreeMemory(device, colorImageMemory, nullptr);
+}
+
+#pragma endregion
+
 #pragma region SyncObjects
 
 void SyncObjects::createSyncObjects()

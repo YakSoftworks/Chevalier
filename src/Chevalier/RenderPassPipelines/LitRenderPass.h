@@ -2,6 +2,8 @@
 
 #include "RenderPassManager.h"
 
+#include "Objects/Materials/CustomMaterials/LightingShader.h"
+
 class ChevalierMaterial;
 
 class LitRenderPass : public RenderPassManager
@@ -22,12 +24,15 @@ protected:
 
 	virtual void InitRenderPipelineResources() override;
 
-
+public:
 	ColorResources mAlbedoResources;
-	ColorResources mNormalResources;
+	NormalResources mNormalResources;
 	DepthResources mDepthResources;
 
 	ChevalierMaterial* lightingMaterial;
+
+	virtual std::vector<VkImageView> getRenderPassImageViews() override;
+
 
 };
 

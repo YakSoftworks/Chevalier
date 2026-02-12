@@ -42,6 +42,7 @@ struct MaterialDescriptorBase {
 	// Allocate Descriptor Set Data
 	virtual void AllocateDescriptorMemory() { /* Do nothing */ };
 
+	virtual void InitDescriptor();
 	
 
 };
@@ -120,7 +121,7 @@ public:
 
 protected:
 
-	void createPipelineLayout();
+	virtual void createPipelineLayout();
 	virtual void createPipeline(RenderPassManager* renderPass, VkShaderModule vertShaderModule, VkShaderModule fragShaderModule, uint32_t subpass);
 
 	// Called in the destructor - Cleans up pipeline resources

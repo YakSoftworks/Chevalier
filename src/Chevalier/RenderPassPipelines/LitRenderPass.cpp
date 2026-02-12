@@ -2,151 +2,192 @@
 
 #include "Objects/Materials/ChevalierMaterial.h"
 
+
 VkRenderPass LitRenderPass::GetRenderPassRef()
 {
 
     if (!mRenderPass) {
-        VkAttachmentDescription colorAttachment{};
-        colorAttachment.format = SwapChainManager::getSwapchainImageFormat();
-        colorAttachment.samples = MSAAResources::getMSAASampleCount();
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 
-        VkAttachmentDescription colorAttachmentResolve{};
-        colorAttachmentResolve.samples = MSAAResources::getMSAASampleCount();
-        colorAttachmentResolve.format = SwapChainManager::getSwapchainImageFormat();
-        colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        // Attachments:
 
-        colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        // Geometry Pass Attachments:
 
-        colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        VkAttachmentDescription finalColorAttachment{};
 
+        finalColorAttachment.format = SwapChainManager::getSwapchainImageFormat();
+        finalColorAttachment.samples = MSAAResources::getMSAASampleCount();
 
-        VkAttachmentReference colorAttachmentRef{};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        finalColorAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        finalColorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        VkAttachmentReference normalAttachmentRef{};
-        colorAttachmentRef.attachment = 1;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-     
+        finalColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        finalColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
-        VkAttachmentReference depthAttachmentRef{};
-        depthAttachmentRef.attachment = 2;
-        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-
-        VkAttachmentReference colorAttachmentResolveRef{};
-        colorAttachmentResolveRef.attachment = 3;
-        colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        finalColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        finalColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+        
 
 
         VkAttachmentDescription depthAttachment{};
-        depthAttachment.format = DepthResources::findDepthFormat();
-        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+        depthAttachment.format = mDepthResources.findDepthFormat();
         depthAttachment.samples = MSAAResources::getMSAASampleCount();
-        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
-        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+
+
+
 
         VkAttachmentDescription albedoAttachment{};
-        albedoAttachment.format = VK_FORMAT_R8G8B8A8_UNORM;
+
+        albedoAttachment.format = SwapChainManager::getSwapchainImageFormat();
         albedoAttachment.samples = MSAAResources::getMSAASampleCount();
-        albedoAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
-        albedoAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        albedoAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        albedoAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
         albedoAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         albedoAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+        albedoAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        albedoAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+        albedoAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        albedoAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+
         VkAttachmentDescription normalAttachment{};
+
         normalAttachment.format = VK_FORMAT_A2B10G10R10_UNORM_PACK32;
         normalAttachment.samples = MSAAResources::getMSAASampleCount();
-        normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+
+        normalAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         normalAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        normalAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+
+        normalAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         normalAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        normalAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        normalAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        std::array attachments = { colorAttachment,normalAttachment, depthAttachment, colorAttachmentResolve };
-
-        VkSubpassDependency geometryDependency{};
-        geometryDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        geometryDependency.dstSubpass = 0;
-        geometryDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        geometryDependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        geometryDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        geometryDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
 
-        VkSubpassDependency lightingDependency{};
-        lightingDependency.srcSubpass = 0;
-        lightingDependency.dstSubpass = 1;
-        lightingDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        lightingDependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        lightingDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        lightingDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        VkAttachmentReference geometryAlbedoAttachmentRef{};
+        geometryAlbedoAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        geometryAlbedoAttachmentRef.attachment = 2;
+
+        VkAttachmentReference geometryNormalAttachmentRef{};
+        geometryNormalAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        geometryNormalAttachmentRef.attachment = 3;
+
+        VkAttachmentReference geometryDepthAttachmentRef{};
+        geometryDepthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+        geometryDepthAttachmentRef.attachment = 2;
+
+        VkAttachmentReference geometryPassColorAttachmentRefs[] = { geometryAlbedoAttachmentRef, geometryNormalAttachmentRef };
+
+        VkSubpassDescription geometryPassDescription{};
+        geometryPassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        geometryPassDescription.inputAttachmentCount = 0;
+
+        geometryPassDescription.colorAttachmentCount = 2;
+        geometryPassDescription.pColorAttachments = geometryPassColorAttachmentRefs;
+
+        geometryPassDescription.pDepthStencilAttachment = &geometryDepthAttachmentRef;
+
+        VkAttachmentReference lightingPassFinalColorAttachmentRef{};
+        lightingPassFinalColorAttachmentRef.attachment = 0;
+        lightingPassFinalColorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentReference lightingPassDepthAttachmentRef{};
+        lightingPassDepthAttachmentRef.attachment = 1;
+        lightingPassDepthAttachmentRef.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        VkAttachmentReference lightingPassAlbedoAttachmentRef{};
+        lightingPassAlbedoAttachmentRef.attachment = 2;
+        lightingPassAlbedoAttachmentRef.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        VkAttachmentReference lightingPassNormalAttachmentRef{};
+        lightingPassNormalAttachmentRef.attachment = 3;
+        lightingPassNormalAttachmentRef.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 
-        VkAttachmentReference colorAttachments[] = { colorAttachmentRef, normalAttachmentRef };
+        VkAttachmentReference lightingPassInputAttachmentRefs[] = { 
+            lightingPassDepthAttachmentRef,
+            lightingPassAlbedoAttachmentRef,
+            lightingPassNormalAttachmentRef
+        };
+
+        VkSubpassDescription lightingPassDescription{};
+        lightingPassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+
+        lightingPassDescription.inputAttachmentCount = 3;
+        lightingPassDescription.pInputAttachments = lightingPassInputAttachmentRefs;
+
+        lightingPassDescription.colorAttachmentCount = 1;
+        lightingPassDescription.pColorAttachments = &lightingPassFinalColorAttachmentRef;
+
+        // Leave Depth Stencil null
 
 
-        VkSubpassDescription geometrySubpass{};
-        geometrySubpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        geometrySubpass.colorAttachmentCount = 1;
-        geometrySubpass.pColorAttachments = colorAttachments;
-        geometrySubpass.pDepthStencilAttachment = &depthAttachmentRef;
-        geometrySubpass.pResolveAttachments = &colorAttachmentResolveRef;
-        
+        // Create Dependencies
 
-        VkAttachmentReference inputAttachments[] = { colorAttachmentRef, normalAttachmentRef, depthAttachmentRef };
+        VkSubpassDependency geometryColorAttachmentDependency{};
+        geometryColorAttachmentDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        geometryColorAttachmentDependency.dstSubpass = 1;
 
-        VkSubpassDescription lightingSubpass{};
-        lightingSubpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        lightingSubpass.colorAttachmentCount = 1;
-        lightingSubpass.pColorAttachments = &colorAttachmentRef;
-        lightingSubpass.pDepthStencilAttachment = &depthAttachmentRef;
-        lightingSubpass.pResolveAttachments = &colorAttachmentResolveRef;
-        lightingSubpass.inputAttachmentCount = 3;
-        lightingSubpass.pInputAttachments = inputAttachments;
+        geometryColorAttachmentDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        geometryColorAttachmentDependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
+        geometryColorAttachmentDependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        geometryColorAttachmentDependency.dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
 
-        std::array<const VkSubpassDescription, 2> subpasses = { geometrySubpass, lightingSubpass };
-        std::array<const VkSubpassDependency, 2> subpassDependencies = { geometryDependency, lightingDependency };
+        geometryColorAttachmentDependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
+        VkSubpassDependency geometryDepthAttachmentDependency{};
 
+        geometryDepthAttachmentDependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+        geometryDepthAttachmentDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        geometryDepthAttachmentDependency.dstSubpass = 1;
+
+        geometryColorAttachmentDependency.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        geometryColorAttachmentDependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+
+        geometryColorAttachmentDependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        geometryColorAttachmentDependency.dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+
+        VkAttachmentDescription renderPassAttachments[] = { finalColorAttachment, depthAttachment, albedoAttachment, normalAttachment };
+        VkSubpassDependency renderPassDependencies[] = { geometryColorAttachmentDependency, geometryDepthAttachmentDependency };
+        VkSubpassDescription renderPassSubpasses[] = { geometryPassDescription, lightingPassDescription };
 
         VkRenderPassCreateInfo createInfo{};
+        createInfo.attachmentCount = 4;
+        createInfo.pAttachments = renderPassAttachments;
+
+        createInfo.dependencyCount = 2;
+        createInfo.pDependencies = renderPassDependencies;
+
+        createInfo.subpassCount = 2;
+        createInfo.pSubpasses = renderPassSubpasses;
+
         createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 
-        createInfo.dependencyCount = static_cast<uint32_t>(subpassDependencies.size());
-        createInfo.pDependencies = subpassDependencies.data();
 
-        createInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-        createInfo.pAttachments = attachments.data();
-
-        createInfo.subpassCount = static_cast<uint32_t>(subpasses.size());
-        createInfo.pSubpasses = subpasses.data();
-
-
-
-
-
-        if (vkCreateRenderPass(VulkanLogicalDevice::getLogicalDevice(), &createInfo, nullptr, &mRenderPass) != VK_SUCCESS) {
+        VkResult result = vkCreateRenderPass(VulkanLogicalDevice::getLogicalDevice(), &createInfo, nullptr, &mRenderPass);
+        if(result != VK_SUCCESS) {
 
             CHEV_MESSAGE_ERROR("Failed to create Render Pass!")
+
         }
+
+        sRenderPassManager = this;
+
+
     }
 
     return mRenderPass;
@@ -204,8 +245,6 @@ void LitRenderPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageIndex
     // Bind resources
     lightingMaterial->BindMaterial(&buffer, imageIndex);
 
-
-
     // Draw full screen shape
     vkCmdDraw(buffer, 3, 1, 0, 0);
     
@@ -226,26 +265,28 @@ void LitRenderPass::InitializeRP()
     VkShaderModule lightingShaderVertModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/LightVert.spv"));
     VkShaderModule lightingShaderFragModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/LightFrag.spv"));
 
-    lightingMaterial = new ChevalierMaterial();
+    InitRenderPipelineResources();
+
+    lightingMaterial = new LightingShader();
 
     lightingMaterial->init_pipeline(this, lightingShaderVertModule, lightingShaderFragModule, 1);
+
+    
 
 }
 
 void LitRenderPass::CreateFrameBuffers()
 {
 
-    InitRenderPipelineResources();
-
     SwapChainManager::swapchainFramebuffers.resize(SwapChainManager::swapchainImageViews.size());
 
     for (size_t i = 0; i < SwapChainManager::swapchainImageViews.size(); i++) {
 
         VkImageView attachments[] = {
-            mAlbedoResources.colorImageView,
-            mNormalResources.colorImageView,
+            SwapChainManager::swapchainImageViews[i],
             mDepthResources.depthImageView,
-            SwapChainManager::swapchainImageViews[i]
+            mAlbedoResources.colorImageView,
+            mNormalResources.colorImageView
         };
 
         VkFramebufferCreateInfo bufferInfo{};
@@ -273,4 +314,10 @@ void LitRenderPass::InitRenderPipelineResources()
     mDepthResources.CreateDepthResources(CHEVALIER_WINDOW_WIDTH_DEFAULT, CHEVALIER_WINDOW_HEIGHT_DEFAULT);
 
 
+}
+
+std::vector<VkImageView> LitRenderPass::getRenderPassImageViews()
+{
+    std::vector<VkImageView> result = { mDepthResources.depthImageView, mAlbedoResources.colorImageView, mNormalResources.colorImageView };
+    return result;
 }

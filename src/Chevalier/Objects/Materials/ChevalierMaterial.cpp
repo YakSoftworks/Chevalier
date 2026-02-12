@@ -418,3 +418,12 @@ void GlobalDescriptorSet::init()
 }
 
 #pragma endregion
+
+void MaterialDescriptorBase::InitDescriptor()
+{
+    AllocateDescriptorMemory();
+
+    CreateDescriptorSetLayout();
+    CreateDescriptorPool();
+    CreateDescriptorSets();
+}

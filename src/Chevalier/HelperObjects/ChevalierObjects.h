@@ -41,6 +41,21 @@ public:
 
 };
 
+struct NormalResources {
+
+    // Contains objects for color buffering
+    VkImage colorImage;
+    VkDeviceMemory colorImageMemory;
+    VkImageView colorImageView;
+
+public:
+
+    void CreateColorResources(uint32_t width, uint32_t height);
+    void cleanup();
+
+
+};
+
 struct MSAAResources {
 	
 protected:
