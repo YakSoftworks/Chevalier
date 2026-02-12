@@ -22,6 +22,9 @@ void ChevalierRenderer::InitRenderer()
 	// RenderPass
 	//mRenderPass.CreateRenderPass(SwapChainManager::getSwapchainImageFormat());
 
+    //Init our global shader data
+    ChevalierMaterial::sGlobalDataManager.init();
+
     //mRenderPassManager = new UnlitRenderPass();
     mRenderPassManager = new LitRenderPass();
     //mRenderPassManager = new WireframeRenderPass();
@@ -47,8 +50,7 @@ void ChevalierRenderer::InitRenderer()
 	SyncObjects::createSyncObjects();
 
 
-    //Init our global shader data
-    ChevalierMaterial::sGlobalDataManager.init();
+
 
 	// Materials
 
