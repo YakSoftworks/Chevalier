@@ -12,6 +12,7 @@
 
 //DEBUG
 #include "Objects/Components/MeshComponent.h"
+#include "Objects/Materials/CustomMaterials/GeometryMaterial.h"
 
 void ChevalierRenderer::InitRenderer()
 {
@@ -142,7 +143,7 @@ void ChevalierRenderer::InitRenderer()
     VkShaderModule vertShaderModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/basicVert.spv"));
     VkShaderModule fragShaderModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/basicFrag.spv"));
 
-    ChevalierMaterial* myMaterial = new ChevalierMaterial();
+    ChevalierMaterial* myMaterial = new GeometryMaterial();
     myMaterial->init_pipeline(mRenderPassManager, vertShaderModule, fragShaderModule, 0);
 
     floor->pMaterial = myMaterial;

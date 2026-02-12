@@ -142,6 +142,7 @@
     <ClCompile Include="src\Chevalier\Objects\Components\Component.cpp" />
     <ClCompile Include="src\Chevalier\Objects\Components\MeshComponent.cpp" />
     <ClCompile Include="src\Chevalier\Objects\Materials\ChevalierMaterial.cpp" />
+    <ClCompile Include="src\Chevalier\Objects\Materials\CustomMaterials\GeometryMaterial.cpp" />
     <ClCompile Include="src\Chevalier\Objects\Materials\CustomMaterials\LightingShader.cpp" />
     <ClCompile Include="src\Chevalier\RenderPassManager.cpp" />
     <ClCompile Include="src\Chevalier\RenderPassPipelines\LitRenderPass.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="src\Chevalier\Objects\Components\MeshComponent.h" />
     <ClInclude Include="src\Chevalier\Objects\Map.h" />
     <ClInclude Include="src\Chevalier\Objects\Materials\ChevalierMaterial.h" />
+    <ClInclude Include="src\Chevalier\Objects\Materials\CustomMaterials\GeometryMaterial.h" />
     <ClInclude Include="src\Chevalier\Objects\Materials\CustomMaterials\LightingShader.h" />
     <ClInclude Include="src\Chevalier\Objects\ObjectTypes.h" />
     <ClInclude Include="src\Chevalier\RenderPassManager.h" />
