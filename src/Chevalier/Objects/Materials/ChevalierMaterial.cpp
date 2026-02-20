@@ -205,7 +205,7 @@ void GlobalDescriptorSet::CreateDescriptorSetLayout()
     globalLayoutBinding.binding = 0;
     globalLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     globalLayoutBinding.descriptorCount = 1;
-    globalLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS; // Describes which shader stages we can access this. VK_SHADER_STAGE_ALL_GRAPHICS for all stages
+    globalLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // Describes which shader stages we can access this. VK_SHADER_STAGE_ALL_GRAPHICS for all stages
     globalLayoutBinding.pImmutableSamplers = nullptr; //Relevant for image sampling
 
     VkDescriptorSetLayoutBinding objectDataLayoutBinding{};
@@ -220,7 +220,7 @@ void GlobalDescriptorSet::CreateDescriptorSetLayout()
     lightingDataLayoutBinding.descriptorCount = 1;
     lightingDataLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     lightingDataLayoutBinding.pImmutableSamplers = nullptr;
-    lightingDataLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+    lightingDataLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
 
     std::array<VkDescriptorSetLayoutBinding, 3> bindings = { globalLayoutBinding, objectDataLayoutBinding, lightingDataLayoutBinding };

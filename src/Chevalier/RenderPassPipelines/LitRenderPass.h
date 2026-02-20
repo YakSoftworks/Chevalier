@@ -31,7 +31,7 @@ public:
 
 	ChevalierMaterial* lightingMaterial;
 
-	virtual std::vector<VkImageView> getRenderPassImageViews() override;
+	virtual void getRenderPassImageViews(std::vector<VkImageView>& imageViewResources) override;
 
 
 };

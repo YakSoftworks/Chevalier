@@ -9,7 +9,7 @@
 // Spot Light - Light within angle of forward direction
 // Directional Light - Light from an infinite distance away
 
-enum LightSourceType : uint8_t
+enum LightSourceType : uint32_t
 {
 	PointLight,
 	SpotLight,
@@ -18,10 +18,11 @@ enum LightSourceType : uint8_t
 
 struct LightShaderInfo {
 
-	int lightType;
+	
 	glm::mat4 lightTransform;
 	glm::vec4 color;
-	glm::vec2 info;
+	glm::vec4 info;
+	int lightType;
 
 };
 

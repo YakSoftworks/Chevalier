@@ -23,7 +23,7 @@ public:
 
 	static RenderPassManager* getRenderPassManager() { return sRenderPassManager; }
 
-	virtual std::vector<VkImageView> getRenderPassImageViews() { return std::vector<VkImageView>(); }
+	virtual void getRenderPassImageViews(std::vector<VkImageView>& imageViewResources) { /* Do Nothing */ }
 
 protected:
 

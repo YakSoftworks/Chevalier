@@ -66,7 +66,9 @@ public:
 
 	friend struct VulkanPhysicalDevice;
 
-	static VkSampleCountFlagBits getMSAASampleCount() { return msaaSample; }
+    static VkSampleCountFlagBits getMSAASampleCount() {
+        return VK_SAMPLE_COUNT_1_BIT;
+    } /*return msaaSample;*/
 
 };
 

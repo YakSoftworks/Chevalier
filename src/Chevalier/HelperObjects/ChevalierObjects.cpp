@@ -26,6 +26,7 @@ void DepthResources::CreateDepthResources(uint32_t width, uint32_t height)
     info.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     
+    info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 
     VulkanImage::createImage(info, depthImage, depthImageMemory);
 
@@ -70,11 +71,17 @@ void ColorResources::CreateColorResources(uint32_t width, uint32_t height){
     colorImageInfo.numSamples = MSAAResources::getMSAASampleCount();
     colorImageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     colorImageInfo.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-    colorImageInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    
+    colorImageInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+
     VulkanImage::createImage(colorImageInfo, colorImage, colorImageMemory);
 
     colorImageView = VulkanImageView::CreateImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+
+    /*VulkanImage::transitionImageLayout(colorImage, colorFormat,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        1);*/
 
 }
 
@@ -100,13 +107,17 @@ void NormalResources::CreateColorResources(uint32_t width, uint32_t height) {
     colorImageInfo.numSamples = MSAAResources::getMSAASampleCount();
     colorImageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     colorImageInfo.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-    colorImageInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    colorImageInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 
     VulkanImage::createImage(colorImageInfo, colorImage, colorImageMemory);
 
     colorImageView = VulkanImageView::CreateImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
         
-
+    /*VulkanImage::transitionImageLayout(colorImage, colorFormat,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        1);*/
 }
 
 void NormalResources::cleanup() {
@@ -157,10 +168,10 @@ void ChevFramebuffer::InitFramebuffers(VkImageView colorImageView, VkImageView d
     for (size_t i = 0; i < SwapChainManager::swapchainImageViews.size(); i++) {
 
         VkImageView attachments[] = {
+            SwapChainManager::swapchainImageViews[i],
+            depthImageView,
             colorImageView,
             normalImageView,
-            depthImageView,
-            SwapChainManager::swapchainImageViews[i]
         };
 
         VkFramebufferCreateInfo bufferInfo{};

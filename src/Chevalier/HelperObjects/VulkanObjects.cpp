@@ -47,6 +47,16 @@ void VulkanInstance::CreateInstance()
     createInfo.ppEnabledExtensionNames = extensions.data();
 
 
+    const std::vector<char const*> validationLayers = {
+        "VK_LAYER_KHRONOS_validation"
+    };
+
+    if (CHEVALIER_ENABLE_VALIDATION_LAYERS) {
+
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+
+    }
     //TODO: DEBUG MESSENGER
 
 

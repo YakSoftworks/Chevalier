@@ -8,19 +8,19 @@ void LightingShaderDescriptor::CreateDescriptorSetLayout()
     depthBinding.binding = 0;
     depthBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
     depthBinding.descriptorCount = 1;
-    depthBinding.stageFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; // Describes which shader stages we can access this. VK_SHADER_STAGE_ALL_GRAPHICS for all stages
+    depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // Describes which shader stages we can access this. VK_SHADER_STAGE_ALL_GRAPHICS for all stages
 
     VkDescriptorSetLayoutBinding albedoBinding{};
     albedoBinding.binding = 1;
     albedoBinding.descriptorCount = 1;
     albedoBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
-    albedoBinding.stageFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    albedoBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
     VkDescriptorSetLayoutBinding normalBinding{};
     normalBinding.binding = 2;
     normalBinding.descriptorCount = 1;
     normalBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
-    normalBinding.stageFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    normalBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 
     std::array<VkDescriptorSetLayoutBinding, 3> bindings = { depthBinding, albedoBinding, normalBinding };
@@ -78,11 +78,11 @@ void LightingShaderDescriptor::CreateDescriptorSets()
         throw std::runtime_error("failed to allocate descriptor sets!");
     }
 
-    std::vector<VkImageView> renderPassResources = RenderPassManager::getRenderPassManager()->getRenderPassImageViews();
-    if (renderPassResources.size() == 0) {
+    std::vector<VkImageView> renderPassResources;
+    RenderPassManager::getRenderPassManager()->getRenderPassImageViews(renderPassResources);
+    if (renderPassResources.size() != 3) {
         CHEV_MESSAGE_ERROR("Invalid Lighting Resources Retrieved!");
     }
-
 
     // Write Initial Values
 
@@ -133,6 +133,8 @@ void LightingShaderDescriptor::CreateDescriptorSets()
         descriptorWrites[2].descriptorCount = 1;
         descriptorWrites[2].pImageInfo = &images[2];
 
+        CHEV_MESSAGE_LOG("Update Lighting Descriptor Sets");
+
         vkUpdateDescriptorSets(VulkanLogicalDevice::getLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 
     }
@@ -142,20 +144,15 @@ void LightingShader::createPipelineLayout()
 {
     materialInputAttachmentDescriptorSet.InitDescriptor();
 
-    VkDescriptorSetLayout setLayouts[] = { sGlobalDataManager.mDescriptorSetLayout, materialInputAttachmentDescriptorSet.mDescriptorSetLayout};
+    VkDescriptorSetLayout setLayouts[] = { materialInputAttachmentDescriptorSet.mDescriptorSetLayout, sGlobalDataManager.mDescriptorSetLayout };
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 2;
     pipelineLayoutInfo.pSetLayouts = setLayouts;
 
-    VkPushConstantRange defaultDataPushRange{};
-    defaultDataPushRange.size = 4;
-    defaultDataPushRange.offset = 0;
-    defaultDataPushRange.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-
-    pipelineLayoutInfo.pPushConstantRanges = &defaultDataPushRange;
-    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = nullptr;
+    pipelineLayoutInfo.pushConstantRangeCount = 0;
 
     if (vkCreatePipelineLayout(VulkanLogicalDevice::getLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
@@ -169,7 +166,7 @@ void LightingShader::BindMaterial(VkCommandBuffer* buffer, uint32_t currentFrame
         pipeline);
 
 
-    VkDescriptorSet lightingSets[] = { sGlobalDataManager.mDescriptorSets[currentFrame], materialInputAttachmentDescriptorSet.mDescriptorSets[currentFrame] };
+    VkDescriptorSet lightingSets[] = { materialInputAttachmentDescriptorSet.mDescriptorSets[currentFrame], sGlobalDataManager.mDescriptorSets[currentFrame] };
 
     vkCmdBindDescriptorSets(
         *buffer,

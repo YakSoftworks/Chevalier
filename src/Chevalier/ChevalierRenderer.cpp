@@ -13,6 +13,7 @@
 //DEBUG
 #include "Objects/Components/MeshComponent.h"
 #include "Objects/Materials/CustomMaterials/GeometryMaterial.h"
+#include "Objects/Lighting/Lights.h"
 
 void ChevalierRenderer::InitRenderer()
 {
@@ -135,10 +136,27 @@ void ChevalierRenderer::InitRenderer()
     pin3->InitializeComponent();
 
 
-    LightComponent* light1 = new PointLightComponent();
-    light1->componentTransform.position = glm::vec3(0.f, 4.f, 0.f);
-    light1->mLightInfo.color = glm::vec4(0.f, 0.f, 1.f, 1.f);
+    LightComponent* light1 = new DirectionalLightComponent();
+    light1->componentTransform.position = glm::vec3(0.f, 0.f, 0.f);
+    light1->componentTransform.rotation = glm::vec3(0.f, 0.f, 90.f);
+    light1->mLightInfo.color = glm::vec4(1.f, 0.f, 0.f, .5f);
+    light1->mLightInfo.info = glm::vec4(0.f, 0.f, 0.f, 0.f);
     light1->InitializeComponent();
+
+    LightComponent* light2 = new DirectionalLightComponent();
+    light2->componentTransform.position = glm::vec3(0.f, 0.f, 0.f);
+    light2->componentTransform.rotation = glm::vec3(0.f, 0.f, 135.f);
+    light2->mLightInfo.color = glm::vec4(1.f, 1.f, 1.f, 1.f);
+    light2->mLightInfo.info = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    light2->InitializeComponent();
+
+    /*LightComponent* light2 = new DirectionalLightComponent();
+    light1->componentTransform.position = glm::vec3(0.f, 5.f, 5.f);
+    light1->componentTransform.rotation = glm::vec3(0.f, 0.f, -90.f);
+    light1->mLightInfo.color = glm::vec4(1.f, 0.f, 0.f, 1.f);
+    light1->InitializeComponent();*/
+
+
 
     VkShaderModule vertShaderModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/basicVert.spv"));
     VkShaderModule fragShaderModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/basicFrag.spv"));
@@ -151,6 +169,10 @@ void ChevalierRenderer::InitRenderer()
     pin1->pMaterial = myMaterial;
     pin2->pMaterial = myMaterial;
     pin3->pMaterial = myMaterial;
+
+
+    // Debug Directional Light
+    
 
     
     // N Plane Sim
@@ -234,6 +256,9 @@ void ChevalierRenderer::drawFrame()
 
     globalDataThisFrame.debugModelMat = glm::rotate(glm::mat4(1.0f), time * glm::radians(15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     
+    globalDataThisFrame.numLights = static_cast<int>(mLightManager.getNumLightSourceComponents());
+
+
     ChevalierMaterial::UpdateGlobalDescriptor(&globalDataThisFrame, currentFrame);
 
 

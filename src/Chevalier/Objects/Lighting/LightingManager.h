@@ -33,6 +33,7 @@ public:
 	// Tell each light to update their lighting buffer object
 	void UpdateLightBuffer(LightShaderInfo* ShaderInfoArray);
 
+	uint32_t getNumLightSourceComponents() { return numLightSourceComponents; }
 
 };
 

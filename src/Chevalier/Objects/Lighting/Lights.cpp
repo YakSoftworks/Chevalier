@@ -49,9 +49,11 @@ void LightComponent::getDefaultLightInformation(LightShaderInfo& lightData)
 
 	lightData.lightTransform = componentTransform.getTransform();
 
-	lightData.color = { 1.f, 1.f, 1.f, 1.f };
+	lightData.color = mLightInfo.color;
 
 	lightData.lightType = LightType;
+
+	lightData.info = mLightInfo.info;
 
 }
 
