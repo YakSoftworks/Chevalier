@@ -40,7 +40,7 @@ uint32_t GeometryManager::RegisterGeometryObject(ChevalierRenderObjectInterface*
 
 }
 
-void GeometryManager::PerformGeometryPass(VkCommandBuffer buffer, uint32_t currentFrame)
+void GeometryManager::PerformGeometryPass(VkCommandBuffer buffer, uint32_t currentFrame, bool useObjectMaterial)
 {
 
     ObjectShaderData* PerObjectDataThisFrame = static_cast<ObjectShaderData*>(ChevalierMaterial::sGlobalDataManager.modelMatrixBuffersMapped[currentFrame]);
@@ -50,8 +50,10 @@ void GeometryManager::PerformGeometryPass(VkCommandBuffer buffer, uint32_t curre
         if (object->IsObjectDrawable()) {
             //ChevalierMaterialInterface* material = object->GetObjectMaterial();
 
-            // Bind Material
-            object->GetObjectMaterial()->BindMaterial(&buffer, currentFrame);
+            if(useObjectMaterial) {
+                // Bind Material
+                object->GetObjectMaterial()->BindMaterial(&buffer, currentFrame);
+            }
             //draw Object
 
             object->DrawObject(buffer, PerObjectDataThisFrame);

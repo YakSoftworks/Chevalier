@@ -52,7 +52,7 @@ public:
 
 	uint32_t RegisterGeometryObject(ChevalierRenderObjectInterface* newGeometryReference, ChevalierMaterialInterface* newMaterialReference);
 
-	void PerformGeometryPass(VkCommandBuffer buffer, uint32_t currentFrame);
+	void PerformGeometryPass(VkCommandBuffer buffer, uint32_t currentFrame, bool useObjectMaterial = true);
 
 
 };

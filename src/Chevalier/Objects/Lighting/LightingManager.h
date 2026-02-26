@@ -33,6 +33,8 @@ public:
 	// Tell each light to update their lighting buffer object
 	void UpdateLightBuffer(LightShaderInfo* ShaderInfoArray);
 
+    const std::vector<LightComponent*>& GetLightComponents() { return LightSourceComponents; }
+
 	uint32_t getNumLightSourceComponents() { return numLightSourceComponents; }
 
 };
