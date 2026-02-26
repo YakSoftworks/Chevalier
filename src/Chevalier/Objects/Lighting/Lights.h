@@ -22,7 +22,6 @@ struct LightShaderInfo {
 	glm::mat4 lightTransform;
 	glm::vec4 color;
 	glm::vec4 info;
-	int lightType;
 
 };
 

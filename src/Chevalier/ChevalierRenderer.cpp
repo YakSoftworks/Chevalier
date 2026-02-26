@@ -111,7 +111,7 @@ void ChevalierRenderer::InitRenderer()
     ball->InitializeComponent();
 
     //////Pin
-    MeshComponent* pin1 = new CylinderComponent();
+    MeshComponent* pin1 = new CubeComponent();
     pin1->renderObjectID = 3;
     pin1->componentTransform.position = glm::vec3(0.f, -2.f, 1.f);
     pin1->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
@@ -119,7 +119,7 @@ void ChevalierRenderer::InitRenderer()
     pin1->LoadMeshComponent();
     pin1->InitializeComponent();
 
-    MeshComponent* pin2 = new CylinderComponent();
+    MeshComponent* pin2 = new CubeComponent();
     pin2->renderObjectID = 4;
     pin2->componentTransform.position = glm::vec3(-.5f, -2.5f, 1.f);
     pin2->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
@@ -127,7 +127,7 @@ void ChevalierRenderer::InitRenderer()
     pin2->LoadMeshComponent();
     pin2->InitializeComponent();
 
-    MeshComponent* pin3 = new CylinderComponent();
+    MeshComponent* pin3 = new CubeComponent();
     pin3->renderObjectID = 5;
     pin3->componentTransform.position = glm::vec3(.5f, -2.5f, 1.f);
     pin3->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
@@ -136,19 +136,38 @@ void ChevalierRenderer::InitRenderer()
     pin3->InitializeComponent();
 
 
-    LightComponent* light1 = new DirectionalLightComponent();
+    LightComponent* light1 = new PointLightComponent();
     light1->componentTransform.position = glm::vec3(0.f, 0.f, 0.f);
-    light1->componentTransform.rotation = glm::vec3(0.f, 0.f, 90.f);
-    light1->mLightInfo.color = glm::vec4(1.f, 0.f, 0.f, .5f);
+    light1->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
+    light1->mLightInfo.color = glm::vec4(0.f, 0.f, 1.f, 0.5f);
     light1->mLightInfo.info = glm::vec4(0.f, 0.f, 0.f, 0.f);
     light1->InitializeComponent();
 
-    LightComponent* light2 = new DirectionalLightComponent();
-    light2->componentTransform.position = glm::vec3(0.f, 0.f, 0.f);
-    light2->componentTransform.rotation = glm::vec3(0.f, 0.f, 135.f);
-    light2->mLightInfo.color = glm::vec4(1.f, 1.f, 1.f, 1.f);
-    light2->mLightInfo.info = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    MeshComponent* pointLightDebugMesh = new SphereComponent();
+    pointLightDebugMesh->renderObjectID = 7;
+    pointLightDebugMesh->componentTransform.position = glm::vec3(0.f, 0.f, 0.f);
+    pointLightDebugMesh->componentTransform.rotation = glm::vec3(0.f, 0.f, 0.f);
+    pointLightDebugMesh->componentTransform.scale = glm::vec3(.25f, .25f, .5f);
+    pointLightDebugMesh->LoadMeshComponent();
+    pointLightDebugMesh->InitializeComponent();
+
+
+    LightComponent* light2 = new SpotLightComponent();
+    light2->componentTransform.position = glm::vec3(0.f, 0.f, 1.f);
+    light2->componentTransform.rotation = glm::vec3(90.f, 180.f, 0.f);
+    light2->mLightInfo.color = glm::vec4(1.f, 1.f, 0.f, 0.2f);
+    light2->mLightInfo.info = glm::vec4(glm::radians(45.f), glm::radians(45.f), 1000.f, 0.f);
     light2->InitializeComponent();
+
+    MeshComponent* lightDebugMesh = new CubeComponent();
+    lightDebugMesh->renderObjectID = 6;
+    lightDebugMesh->componentTransform.position = glm::vec3(0.f, 0.f, 1.f);
+    lightDebugMesh->componentTransform.rotation = glm::vec3(90.f, 180.f, 0.f);
+    lightDebugMesh->componentTransform.scale = glm::vec3(.25f, .25f, .5f);
+    lightDebugMesh->LoadMeshComponent();
+    lightDebugMesh->InitializeComponent();
+
+    
 
     /*LightComponent* light2 = new DirectionalLightComponent();
     light1->componentTransform.position = glm::vec3(0.f, 5.f, 5.f);
@@ -170,6 +189,8 @@ void ChevalierRenderer::InitRenderer()
     pin2->pMaterial = myMaterial;
     pin3->pMaterial = myMaterial;
 
+    lightDebugMesh->pMaterial = myMaterial;
+    pointLightDebugMesh->pMaterial = myMaterial;
 
     // Debug Directional Light
     
@@ -240,7 +261,7 @@ void ChevalierRenderer::drawFrame()
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     GlobalDataObject globalDataThisFrame{};
-    globalDataThisFrame.viewMat = glm::lookAt(glm::vec3(5, 0.0f, 0.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
+    globalDataThisFrame.viewMat = glm::lookAt(glm::vec3(-5.f, 0.0f, 0.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
     globalDataThisFrame.perspectiveMat = glm::perspective(
         glm::radians(45.f),
         ((float)CHEVALIER_WINDOW_WIDTH_DEFAULT / (float)CHEVALIER_WINDOW_HEIGHT_DEFAULT),
@@ -254,7 +275,7 @@ void ChevalierRenderer::drawFrame()
      
     globalDataThisFrame.projViewMat = globalDataThisFrame.perspectiveMat * globalDataThisFrame.viewMat;
 
-    globalDataThisFrame.debugModelMat = glm::rotate(glm::mat4(1.0f), time * glm::radians(15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    globalDataThisFrame.inverseProjViewMat = glm::inverse(globalDataThisFrame.projViewMat);
     
     globalDataThisFrame.numLights = static_cast<int>(mLightManager.getNumLightSourceComponents());
 

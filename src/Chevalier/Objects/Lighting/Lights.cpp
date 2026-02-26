@@ -51,9 +51,9 @@ void LightComponent::getDefaultLightInformation(LightShaderInfo& lightData)
 
 	lightData.color = mLightInfo.color;
 
-	lightData.lightType = LightType;
-
 	lightData.info = mLightInfo.info;
+
+	lightData.info.w = (float) LightType;
 
 }
 

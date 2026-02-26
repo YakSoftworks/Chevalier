@@ -24,8 +24,6 @@ void DepthResources::CreateDepthResources(uint32_t width, uint32_t height)
     info.format = depthFormat;
     info.tiling = VK_IMAGE_TILING_OPTIMAL;
     info.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-    info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    
     info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 
     VulkanImage::createImage(info, depthImage, depthImageMemory);

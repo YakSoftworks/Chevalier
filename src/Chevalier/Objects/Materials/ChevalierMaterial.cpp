@@ -112,6 +112,7 @@ void ChevalierMaterial::createPipeline(RenderPassManager* renderPass, VkShaderMo
     depthCreateInfo.depthWriteEnable = VK_TRUE;
     depthCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
     depthCreateInfo.depthBoundsTestEnable = VK_FALSE;
+    
 
     std::vector<VkDynamicState> dynamicStates = {
         VK_DYNAMIC_STATE_VIEWPORT,

@@ -49,7 +49,7 @@ struct GlobalDataObject {
     glm::mat4 perspectiveMat;
     glm::mat4 viewMat;
     glm::mat4 projViewMat;
-    glm::mat4 debugModelMat;
+    glm::mat4 inverseProjViewMat;
 
     float timeSinceStart = 0;
 

@@ -10,7 +10,7 @@ layout(std140,binding = 0, set = 0) uniform GlobalDataObject {
     mat4 proj;
     mat4 view;
     mat4 projViewMat;
-    mat4 debugModelMat;
+    mat4 inverseProjViewMat;
     float timeSinceStart;
     int numLights;
 } Globals;
