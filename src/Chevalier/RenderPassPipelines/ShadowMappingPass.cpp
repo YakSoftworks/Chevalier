@@ -127,14 +127,39 @@ VkRenderPass ShadowMappingPass::GetRenderPassRef()
         defaultShadowDepthSubpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
 
+        VkSubpassDependency defaultShadowMappingDependency{};
+        defaultShadowMappingDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        defaultShadowMappingDependency.dstSubpass = 0;
+        defaultShadowMappingDependency.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;;
+        defaultShadowMappingDependency.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;;
+        defaultShadowMappingDependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        defaultShadowMappingDependency.dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
+        defaultShadowMappingDependency.dependencyFlags = 0;
+
+        VkSubpassDependency  defaultApplyShadowDependency{};
+        defaultApplyShadowDependency.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        defaultApplyShadowDependency.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;;
+        defaultApplyShadowDependency.srcAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
+        defaultApplyShadowDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        defaultApplyShadowDependency.dependencyFlags = 0;
+
+
+
         // For each light:
         // Build Subpass Requirements
         const std::vector<LightComponent*>& lightComponents = LightingManager::GetLightingManager()->GetLightComponents();
 
+        uint32_t currentSubpassID = 0;
+
         std::vector<VkSubpassDescription> subpassDescriptions;
         subpassDescriptions.resize(lightComponents.size()); // TODO: Get lighting count from LightingManager
 
+        std::vector<VkSubpassDependency> subpassDependencies;
+        subpassDependencies.resize(lightComponents.size());
+
         for(LightComponent* LightSource : lightComponents){
+
+            VkSubpassDependency tempDependency{};
 
             // Build subpass Requirements based on light type
             if(LightSource->mLightInfo.lightType == 0){
@@ -144,25 +169,103 @@ VkRenderPass ShadowMappingPass::GetRenderPassRef()
                 subpassDescriptions.push_back(defaultShadowDepthSubpass);
                 subpassDescriptions.push_back(defaultLightApplicationSubpass);
 
+                // Dependencies
+                tempDependency = defaultShadowMappingDependency;
+                tempDependency.srcSubpass = currentSubpassID;
+                tempDependency.dstSubpass = currentSubpassID+1;
+                subpassDependencies.push_back(tempDependency);
+
+                tempDependency = defaultApplyShadowDependency;
+                tempDependency.srcSubpass = currentSubpassID+1;
+                tempDependency.dstSubpass = currentSubpassID+2;
+                subpassDependencies.push_back(tempDependency);
+
+                currentSubpassID+=2;
+
                 // Down
                 subpassDescriptions.push_back(defaultShadowDepthSubpass);
                 subpassDescriptions.push_back(defaultLightApplicationSubpass);
+
+                // Dependencies
+                tempDependency = defaultShadowMappingDependency;
+                tempDependency.srcSubpass = currentSubpassID;
+                tempDependency.dstSubpass = currentSubpassID+1;
+                subpassDependencies.push_back(tempDependency);
+
+                tempDependency = defaultApplyShadowDependency;
+                tempDependency.srcSubpass = currentSubpassID+1;
+                tempDependency.dstSubpass = currentSubpassID+2;
+                subpassDependencies.push_back(tempDependency);
+
+                currentSubpassID+=2;
 
                 // Left
                 subpassDescriptions.push_back(defaultShadowDepthSubpass);
                 subpassDescriptions.push_back(defaultLightApplicationSubpass);
 
+                // Dependencies
+                tempDependency = defaultShadowMappingDependency;
+                tempDependency.srcSubpass = currentSubpassID;
+                tempDependency.dstSubpass = currentSubpassID+1;
+                subpassDependencies.push_back(tempDependency);
+
+                tempDependency = defaultApplyShadowDependency;
+                tempDependency.srcSubpass = currentSubpassID+1;
+                tempDependency.dstSubpass = currentSubpassID+2;
+                subpassDependencies.push_back(tempDependency);
+
+                currentSubpassID+=2;
+
                 // Right
                 subpassDescriptions.push_back(defaultShadowDepthSubpass);
                 subpassDescriptions.push_back(defaultLightApplicationSubpass);
+
+                // Dependencies
+                tempDependency = defaultShadowMappingDependency;
+                tempDependency.srcSubpass = currentSubpassID;
+                tempDependency.dstSubpass = currentSubpassID+1;
+                subpassDependencies.push_back(tempDependency);
+
+                tempDependency = defaultApplyShadowDependency;
+                tempDependency.srcSubpass = currentSubpassID+1;
+                tempDependency.dstSubpass = currentSubpassID+2;
+                subpassDependencies.push_back(tempDependency);
+
+                currentSubpassID+=2;
 
                 // Forwards
                 subpassDescriptions.push_back(defaultShadowDepthSubpass);
                 subpassDescriptions.push_back(defaultLightApplicationSubpass);
 
+                // Dependencies
+                tempDependency = defaultShadowMappingDependency;
+                tempDependency.srcSubpass = currentSubpassID;
+                tempDependency.dstSubpass = currentSubpassID+1;
+                subpassDependencies.push_back(tempDependency);
+
+                tempDependency = defaultApplyShadowDependency;
+                tempDependency.srcSubpass = currentSubpassID+1;
+                tempDependency.dstSubpass = currentSubpassID+2;
+                subpassDependencies.push_back(tempDependency);
+
+                currentSubpassID+=2;
+
                 // Backwards
                 subpassDescriptions.push_back(defaultShadowDepthSubpass);
                 subpassDescriptions.push_back(defaultLightApplicationSubpass);
+
+                // Dependencies
+                tempDependency = defaultShadowMappingDependency;
+                tempDependency.srcSubpass = currentSubpassID;
+                tempDependency.dstSubpass = currentSubpassID+1;
+                subpassDependencies.push_back(tempDependency);
+
+                tempDependency = defaultApplyShadowDependency;
+                tempDependency.srcSubpass = currentSubpassID+1;
+                tempDependency.dstSubpass = currentSubpassID+2;
+                subpassDependencies.push_back(tempDependency);
+
+                currentSubpassID+=2;
 
 
             } else if (LightSource->mLightInfo.lightType == 1) {
@@ -171,12 +274,38 @@ VkRenderPass ShadowMappingPass::GetRenderPassRef()
                 subpassDescriptions.push_back(defaultShadowDepthSubpass);
                 subpassDescriptions.push_back(defaultLightApplicationSubpass);
 
+                // Dependencies
+                tempDependency = defaultShadowMappingDependency;
+                tempDependency.srcSubpass = currentSubpassID;
+                tempDependency.dstSubpass = currentSubpassID+1;
+                subpassDependencies.push_back(tempDependency);
+
+                tempDependency = defaultApplyShadowDependency;
+                tempDependency.srcSubpass = currentSubpassID+1;
+                tempDependency.dstSubpass = currentSubpassID+2;
+                subpassDependencies.push_back(tempDependency);
+
+                currentSubpassID+=2;
+
 
             } else if (LightSource->mLightInfo.lightType == 2) {
                 // Directional Light
 
                 subpassDescriptions.push_back(defaultShadowDepthSubpass);
                 subpassDescriptions.push_back(defaultLightApplicationSubpass);
+
+                // Dependencies
+                tempDependency = defaultShadowMappingDependency;
+                tempDependency.srcSubpass = currentSubpassID;
+                tempDependency.dstSubpass = currentSubpassID+1;
+                subpassDependencies.push_back(tempDependency);
+
+                tempDependency = defaultApplyShadowDependency;
+                tempDependency.srcSubpass = currentSubpassID+1;
+                tempDependency.dstSubpass = currentSubpassID+2;
+                subpassDependencies.push_back(tempDependency);
+
+                currentSubpassID+=2;
 
 
             }
