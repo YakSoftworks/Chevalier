@@ -13,21 +13,21 @@ class ShadowMappingPass : public RenderPassManager
         // 1 - Depth Image
         // 2 - Albedo Image
         // 3 - Normal Image
-        // 4 - Light Depth Map
+        // 4 - Shadow Depth Map
 
 
 	virtual VkRenderPass GetRenderPassRef() override;
 
 	virtual void RecordRenderPass(VkCommandBuffer buffer, uint32_t imageIndex) override;
 
-	virtual void InitializeRP() override;
+    void InitializeRP() override;
 
 
 protected:
 
-	virtual void CreateFrameBuffers() override;
+    void CreateFrameBuffers() override;
 
-	virtual void InitRenderPipelineResources() override;
+    void InitRenderPipelineResources() override;
 
 public:
 	ColorResources mAlbedoResources;
@@ -38,7 +38,13 @@ public:
 	ChevalierMaterial* mShadowMapMaterial;
 	ChevalierMaterial* mApplyShadowMaterial;
 
-	virtual void getRenderPassImageViews(std::vector<VkImageView>& imageViewResources) override;
+     void getRenderPassImageViews(std::vector<VkImageView>& imageViewResources) override {
+        imageViewResources.resize(4);
+        imageViewResources[0] = mDepthResources.depthImageView;
+        imageViewResources[1] = mAlbedoResources.colorImageView;
+        imageViewResources[2] = mNormalResources.colorImageView;
+        imageViewResources[3] = mShadowDepthResources.depthImageView;
+    }
 
 
 };
