@@ -318,8 +318,8 @@ VkRenderPass ShadowMappingPass::GetRenderPassRef()
         createInfo.attachmentCount = 5;
         createInfo.pAttachments = attachments;
 
-        createInfo.dependencyCount = 4;
-        createInfo.pDependencies = subpassDependencies;
+        createInfo.dependencyCount = subpassDependencies.size();
+        createInfo.pDependencies = subpassDependencies.data();
 
         createInfo.subpassCount = static_cast<uint32_t>(subpassDescriptions.size());
         createInfo.pSubpasses = subpassDescriptions.data();
@@ -401,6 +401,8 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
     // For each light source:
     for(LightComponent* lightSource : lightSourceComponents) {
 
+        bool bIsLastLightSource = lightSourceComponents[lightSourceComponents.size()-1] == lightSource;
+
         // Build subpass Requirements based on light type
         if(lightSource->mLightInfo.lightType == 0){
             // Point Light
@@ -417,6 +419,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
             vkCmdPushConstants(buffer, mShadowMapMaterial->getMaterialLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, 0, 64, &lightViewTransform);
 
             sGeometryManager->PerformGeometryPass(buffer, imageIndex, false);
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
 
@@ -430,7 +433,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
 
             // Draw full screen shape
             vkCmdDraw(buffer, 3, 1, 0, 0);
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
             // Backwards
@@ -441,7 +444,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
             vkCmdPushConstants(buffer, mShadowMapMaterial->getMaterialLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, 0, 64, &lightViewTransform);
 
             sGeometryManager->PerformGeometryPass(buffer, imageIndex, false);
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
             // Apply Pass
@@ -454,7 +457,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
 
             // Draw full screen shape
             vkCmdDraw(buffer, 3, 1, 0, 0);
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
             // Up
@@ -465,7 +468,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
             vkCmdPushConstants(buffer, mShadowMapMaterial->getMaterialLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, 0, 64, &lightViewTransform);
 
             sGeometryManager->PerformGeometryPass(buffer, imageIndex, false);
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
             // Apply Pass
@@ -478,7 +481,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
 
             // Draw full screen shape
             vkCmdDraw(buffer, 3, 1, 0, 0);
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
             // Down
@@ -489,7 +492,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
             vkCmdPushConstants(buffer, mShadowMapMaterial->getMaterialLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, 0, 64, &lightViewTransform);
 
             sGeometryManager->PerformGeometryPass(buffer, imageIndex, false);
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
             // Apply Pass
@@ -502,7 +505,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
 
             // Draw full screen shape
             vkCmdDraw(buffer, 3, 1, 0, 0);
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
             // Left
@@ -513,8 +516,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
             vkCmdPushConstants(buffer, mShadowMapMaterial->getMaterialLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, 0, 64, &lightViewTransform);
 
             sGeometryManager->PerformGeometryPass(buffer, imageIndex, false);
-
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
             // Apply Pass
 
@@ -526,7 +528,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
 
             // Draw full screen shape
             vkCmdDraw(buffer, 3, 1, 0, 0);
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
             // Right
             lightViewTransform = glm::rotate(lightSource->mLightInfo.lightTransform, 270.f, glm::vec3(0.f, 1.f, 0.f));
@@ -536,7 +538,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
             vkCmdPushConstants(buffer, mShadowMapMaterial->getMaterialLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, 0, 64, &lightViewTransform);
 
             sGeometryManager->PerformGeometryPass(buffer, imageIndex, false);
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
             // Apply Pass
@@ -550,6 +552,11 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
             // Draw full screen shape
             vkCmdDraw(buffer, 3, 1, 0, 0);
 
+
+            //ASK IF TO NEXT SUBPASS
+            if(!bIsLastLightSource){
+                vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
+            }
 
 
         } else if (lightSource->mLightInfo.lightType == 1) {
@@ -565,7 +572,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
             vkCmdPushConstants(buffer, mShadowMapMaterial->getMaterialLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, 0, 64, &lightViewTransform);
 
             sGeometryManager->PerformGeometryPass(buffer, imageIndex, false);
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
             // Apply Pass
@@ -579,6 +586,10 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
             // Draw full screen shape
             vkCmdDraw(buffer, 3, 1, 0, 0);
 
+            //ASK IF TO NEXT SUBPASS
+            if(!bIsLastLightSource){
+                vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
+            }
 
 
         } else if (lightSource->mLightInfo.lightType == 2) {
@@ -594,7 +605,7 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
             vkCmdPushConstants(buffer, mShadowMapMaterial->getMaterialLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, 0, 64, &lightViewTransform);
 
             sGeometryManager->PerformGeometryPass(buffer, imageIndex, false);
-
+            vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
 
 
             // Apply Pass
@@ -607,6 +618,11 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
 
             // Draw full screen shape
             vkCmdDraw(buffer, 3, 1, 0, 0);
+
+            //ASK IF TO NEXT SUBPASS
+            if(!bIsLastLightSource){
+                vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
+            }
 
         }
 
