@@ -1,5 +1,7 @@
 #include "MeshComponent.h"
 
+#include "Objects/GeometryManager.h"
+
 void MeshComponent::LoadMeshComponent(){
     
     // Populate our vertex and index data
@@ -86,15 +88,6 @@ void MeshComponent::DrawObject(VkCommandBuffer buffer, ObjectShaderData* objectD
 
     //ObjectDataThisFrame.modelMat = componentTransform.getTransform();
 
-    glm::vec3 TranslationVector{ 0.0, 0.0, 0.0 };
-
-    if (renderObjectID < 1) {
-        TranslationVector = { 0.0, 1.0, 0.0 };
-    }
-    else {
-        TranslationVector = { 0.0, -1.0, 0.0 };
-    }
-
     //debug Model Mat
     //ObjectDataThisFrame.modelMat = glm::translate(glm::mat4(1.0f), TranslationVector) * glm::rotate(glm::mat4(1.0f), time * glm::radians(15.0f), glm::vec3(0.f, 1.f, 1.f));
         
@@ -124,6 +117,11 @@ bool MeshComponent::IsObjectDrawable()
 ChevalierMaterialInterface* MeshComponent::GetObjectMaterial()
 {
     return pMaterial;
+}
+
+void MeshComponent::InitializeComponent()
+{
+    renderObjectID = GeometryManager::getGeometryManager()->RegisterGeometryObject(this, pMaterial);
 }
 
 
@@ -337,7 +335,7 @@ void SphereComponent::GenerateVerts() {
             p1.color.y = static_cast<float>(sin(currentHeightRadians));
             p1.color.z = static_cast<float>(cos(currentHeightRadians));
 
-            //TODO: NORMALS
+            p1.normal = p1.pos;
 
             //Submit Vert
             verts.push_back(p1);

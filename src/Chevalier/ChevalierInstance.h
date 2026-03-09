@@ -7,6 +7,8 @@
 
 class ChevalierInstance
 {
+public:
+	ChevalierInstance() { }
 
 protected:
 

@@ -7,9 +7,16 @@
 #include "Objects/Map.h"
 #include "ChevalierInterfaces.h"
 
+#include "Objects/Lighting/LightingManager.h"
+#include "Objects/GeometryManager.h"
+
+class RenderPassManager;
+
 class ChevalierRenderer {
 
 public:
+
+	ChevalierRenderer() {}
 
 	// Management Functions
 	void InitRenderer();
@@ -28,30 +35,27 @@ protected:
 
 	//Owned Objects
 
-	VulkanRenderPass mRenderPass;
+	//VulkanRenderPass mRenderPass;
 
 	VulkanCommandBuffers mCommandBuffers; 
-	
-	// DEPTH RESOURCES
-	DepthResources mDepthResources;
 
-	//TODO: COLOR RESOURCES
-	ColorResources mColorResources;
-
-	// Current Drawobjects
-	std::vector<ChevalierRenderObjectInterface*> RenderObjects;
-
-	// Current Materials
-	std::vector<ChevalierMaterialInterface*> Materials;
 
 	uint32_t currentFrame = 0;
 	
 	//Boolean for resizing frame buffer
 	bool framebufferResized = false;
 
-
 	// Temporary Object Management
 	std::vector<Actor*> actors; 
+
+	// Managment for lights
+	LightingManager mLightManager;
+
+	// Geometry Manager
+	GeometryManager mGeometryManager;
+
+	// RenderPass management
+	RenderPassManager* mRenderPassManager;
 
 
 protected:
@@ -59,6 +63,7 @@ protected:
 	// Helpers
 
 	void recreateWindowResources();
+
 
 public:
 

@@ -1,6 +1,8 @@
 #include "ChevalierMaterial.h"
 #include "Objects/ObjectTypes.h"
 
+#include "RenderPassManager.h"
+
 
 //Statics
 GlobalDescriptorSet ChevalierMaterial::sGlobalDataManager{};
@@ -26,15 +28,10 @@ void ChevalierMaterial::createPipelineLayout()
     }
 }
 
-void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
+void ChevalierMaterial::createPipeline(RenderPassManager* renderPass, VkShaderModule vertShaderModule, VkShaderModule fragShaderModule, uint32_t subpass)
 {
+
 #pragma region Shader Modules
-
-    auto vertShaderCode = FileReader::readFile("content/shaders/ChevalierII/basicVert.spv");
-    auto fragShaderCode = FileReader::readFile("content/shaders/ChevalierII/basicFrag.spv");
-
-    VkShaderModule vertShaderModule = ChevalierMaterial::createShaderModule(vertShaderCode);
-    VkShaderModule fragShaderModule = ChevalierMaterial::createShaderModule(fragShaderCode);
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -49,6 +46,7 @@ void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
     fragShaderStageInfo.pName = "main";
 
     VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+
 #pragma endregion
 
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
@@ -67,20 +65,25 @@ void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
     inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     inputAssembly.primitiveRestartEnable = VK_FALSE;
 
+
     VkPipelineViewportStateCreateInfo viewportState{};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
     viewportState.viewportCount = 1;
     viewportState.scissorCount = 1;
 
     VkPipelineRasterizationStateCreateInfo rasterizer{};
-    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    /*rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    rasterizer.depthBiasEnable = VK_FALSE;
+    rasterizer.depthBiasEnable = VK_FALSE;*/
+
+    // Pull from custom setup
+    renderPass->GetPassRasterizationStateInfo(rasterizer);
+
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -109,7 +112,7 @@ void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
     depthCreateInfo.depthWriteEnable = VK_TRUE;
     depthCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
     depthCreateInfo.depthBoundsTestEnable = VK_FALSE;
-
+    
 
     std::vector<VkDynamicState> dynamicStates = {
         VK_DYNAMIC_STATE_VIEWPORT,
@@ -134,22 +137,26 @@ void ChevalierMaterial::createPipeline(VkRenderPass renderPass)
     pipelineInfo.pDynamicState = &dynamicState;
     pipelineInfo.pDepthStencilState = &depthCreateInfo;
     pipelineInfo.layout = pipelineLayout;
-    pipelineInfo.renderPass = renderPass;
-    pipelineInfo.subpass = 0;
+    pipelineInfo.renderPass = renderPass->GetRenderPassRef();
+    pipelineInfo.subpass = subpass;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-    if (vkCreateGraphicsPipelines(VulkanLogicalDevice::getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS) {
+
+    VkResult result = vkCreateGraphicsPipelines(VulkanLogicalDevice::getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline);
+
+    if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
+
 }
 
 
-void ChevalierMaterial::init_pipeline(VkRenderPass renderPass)
+void ChevalierMaterial::init_pipeline(RenderPassManager* renderPass, VkShaderModule vertShaderModule, VkShaderModule fragShaderModule, uint32_t subpass)
 {
 
     createPipelineLayout();
 
-    createPipeline(renderPass);
+    createPipeline(renderPass, vertShaderModule, fragShaderModule, subpass);
 
 }
 
@@ -199,7 +206,7 @@ void GlobalDescriptorSet::CreateDescriptorSetLayout()
     globalLayoutBinding.binding = 0;
     globalLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     globalLayoutBinding.descriptorCount = 1;
-    globalLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS; // Describes which shader stages we can access this. VK_SHADER_STAGE_ALL_GRAPHICS for all stages
+    globalLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // Describes which shader stages we can access this. VK_SHADER_STAGE_ALL_GRAPHICS for all stages
     globalLayoutBinding.pImmutableSamplers = nullptr; //Relevant for image sampling
 
     VkDescriptorSetLayoutBinding objectDataLayoutBinding{};
@@ -214,7 +221,7 @@ void GlobalDescriptorSet::CreateDescriptorSetLayout()
     lightingDataLayoutBinding.descriptorCount = 1;
     lightingDataLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     lightingDataLayoutBinding.pImmutableSamplers = nullptr;
-    lightingDataLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+    lightingDataLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
 
     std::array<VkDescriptorSetLayoutBinding, 3> bindings = { globalLayoutBinding, objectDataLayoutBinding, lightingDataLayoutBinding };
@@ -292,7 +299,7 @@ void GlobalDescriptorSet::CreateDescriptorSets()
         VkDescriptorBufferInfo lightBufferInfo{};
         lightBufferInfo.buffer = lightingBuffers[i];
         lightBufferInfo.offset = 0;
-        lightBufferInfo.range = sizeof(LightShaderData) * CHEVALIER_CONSTANTS_INITIAL_LIGHTING_COUNT;
+        lightBufferInfo.range = sizeof(LightShaderInfo) * CHEVALIER_CONSTANTS_INITIAL_LIGHTING_COUNT;
 
 
         std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
@@ -382,8 +389,7 @@ void GlobalDescriptorSet::createMemoryBuffers()
 
     // Lighting Data
 
-
-    bufferSize = sizeof(LightShaderData) * CHEVALIER_CONSTANTS_INITIAL_LIGHTING_COUNT;
+    bufferSize = sizeof(LightShaderInfo) * CHEVALIER_CONSTANTS_INITIAL_LIGHTING_COUNT;
 
     lightingBuffers.resize(CHEVALIER_MAX_FRAMES_IN_FLIGHT);
     lightingBuffersMemory.resize(CHEVALIER_MAX_FRAMES_IN_FLIGHT);
@@ -413,3 +419,12 @@ void GlobalDescriptorSet::init()
 }
 
 #pragma endregion
+
+void MaterialDescriptorBase::InitDescriptor()
+{
+    AllocateDescriptorMemory();
+
+    CreateDescriptorSetLayout();
+    CreateDescriptorPool();
+    CreateDescriptorSets();
+}

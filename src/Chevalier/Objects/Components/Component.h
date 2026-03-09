@@ -7,6 +7,13 @@
 class Component{
 
     
+
+public:
+
+    virtual void PreInitializeComponent();
+    virtual void InitializeComponent(); // Register component
+    virtual void PostInitializeComponent();
+
     //Core Realtime Functions - Override for usage
 public:
     virtual void BeginPlay() {}; // Called whenever object is spawned
@@ -21,7 +28,7 @@ public:
 // Component with a transform
 class SceneComponent : public Component {
 
-protected:
+public:
     //Owns a transform
     ModelTransform componentTransform;
 

@@ -24,8 +24,7 @@ void DepthResources::CreateDepthResources(uint32_t width, uint32_t height)
     info.format = depthFormat;
     info.tiling = VK_IMAGE_TILING_OPTIMAL;
     info.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-    info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    
+    info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 
     VulkanImage::createImage(info, depthImage, depthImageMemory);
 
@@ -70,15 +69,56 @@ void ColorResources::CreateColorResources(uint32_t width, uint32_t height){
     colorImageInfo.numSamples = MSAAResources::getMSAASampleCount();
     colorImageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     colorImageInfo.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-    colorImageInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    
+    colorImageInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+
     VulkanImage::createImage(colorImageInfo, colorImage, colorImageMemory);
 
     colorImageView = VulkanImageView::CreateImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 
+    /*VulkanImage::transitionImageLayout(colorImage, colorFormat,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        1);*/
+
 }
 
 void ColorResources::cleanup(){
+    VkDevice device = VulkanLogicalDevice::getLogicalDevice();
+    vkDestroyImage(device, colorImage, nullptr);
+    vkDestroyImageView(device, colorImageView, nullptr);
+    vkFreeMemory(device, colorImageMemory, nullptr);
+}
+
+#pragma endregion
+
+#pragma region Normal Resources
+
+void NormalResources::CreateColorResources(uint32_t width, uint32_t height) {
+    VkFormat colorFormat = VK_FORMAT_A2B10G10R10_UNORM_PACK32;
+
+    ImageCreationInfo colorImageInfo{};
+    colorImageInfo.width = width;
+    colorImageInfo.height = height;
+    colorImageInfo.format = colorFormat;
+    colorImageInfo.mipLevel = 1;
+    colorImageInfo.numSamples = MSAAResources::getMSAASampleCount();
+    colorImageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    colorImageInfo.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    colorImageInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+
+    VulkanImage::createImage(colorImageInfo, colorImage, colorImageMemory);
+
+    colorImageView = VulkanImageView::CreateImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+        
+    /*VulkanImage::transitionImageLayout(colorImage, colorFormat,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        1);*/
+}
+
+void NormalResources::cleanup() {
     VkDevice device = VulkanLogicalDevice::getLogicalDevice();
     vkDestroyImage(device, colorImage, nullptr);
     vkDestroyImageView(device, colorImageView, nullptr);
@@ -119,22 +159,23 @@ void SyncObjects::createSyncObjects()
 
 #pragma region ChevFrameBuffers
 
-void ChevFramebuffer::InitFramebuffers(VkImageView colorImageView, VkImageView depthImageView, VkRenderPass renderPass)
+void ChevFramebuffer::InitFramebuffers(VkImageView colorImageView, VkImageView depthImageView, VkImageView normalImageView, VkRenderPass renderPass)
 {
     SwapChainManager::swapchainFramebuffers.resize(SwapChainManager::swapchainImageViews.size());
 
     for (size_t i = 0; i < SwapChainManager::swapchainImageViews.size(); i++) {
 
         VkImageView attachments[] = {
-            colorImageView,
+            SwapChainManager::swapchainImageViews[i],
             depthImageView,
-            SwapChainManager::swapchainImageViews[i]
+            colorImageView,
+            normalImageView,
         };
 
         VkFramebufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         bufferInfo.renderPass = renderPass;
-        bufferInfo.attachmentCount = 3;
+        bufferInfo.attachmentCount = 4;
         bufferInfo.pAttachments = attachments;
         bufferInfo.width = SwapChainManager::swapchainExtent.width;
         bufferInfo.height = SwapChainManager::swapchainExtent.height;
