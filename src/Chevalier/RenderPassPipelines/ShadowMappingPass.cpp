@@ -3,6 +3,9 @@
 #include "Objects/Materials/ChevalierMaterial.h"
 #include "LightingManager.h"
 
+#include "CustomMaterials/ShadowMappingMaterials/ShadowLightingMaterial.h"
+#include "CustomMaterials/ShadowMappingMaterials/ShadowGeometryMaterial.h"
+
 VkRenderPass ShadowMappingPass::GetRenderPassRef()
 {
 
@@ -628,12 +631,26 @@ void ShadowMappingPass::RecordRenderPass(VkCommandBuffer buffer, uint32_t imageI
 
     }
 
-
-
-    // Draw full screen shape
-    vkCmdDraw(buffer, 3, 1, 0, 0);
-
     // End Render Pass
     vkCmdEndRenderPass(buffer);
 
+}
+
+void ShadowMappingPass::InitializeRP() {
+    // Lighting Material
+
+    //TODO: Update paths
+    VkShaderModule shadowGeometryVertModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/LightVert.spv"));
+    VkShaderModule shadowGeometryFragModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/LightFrag.spv"));
+
+    VkShaderModule shadowLightingVertModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/LightVert.spv"));
+    VkShaderModule shadowLightingFragModule = ChevalierMaterial::createShaderModule(FileReader::readFile("content/shaders/ChevalierII/LightFrag.spv"));
+
+    InitRenderPipelineResources();
+
+    mShadowMapMaterial = new ShadowGeometryMaterial();
+    mShadowMapMaterial->init_pipeline(this, shadowGeometryVertModule, shadowGeometryFragModule, 0);
+
+    mApplyShadowMaterial = new ShadowLightingMaterial();
+    mApplyShadowMaterial->init_pipeline(this, shadowLightingVertModule, shadowLightingFragModule, 1);
 }
