@@ -16,12 +16,16 @@ struct ShadowLightDescriptor : public MaterialDescriptorBase {
     // Create Descriptor Sets
     virtual void CreateDescriptorSets() override;
 
+    VkSampler depthImageSampler;
+
 };
 
 
 class ShadowLightingMaterial : public ChevalierMaterial {
 
     ShadowLightDescriptor materialInputAttachmentDescriptorSet;
+
+
 
     virtual void createPipelineLayout() override;
 

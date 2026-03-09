@@ -28,7 +28,7 @@ void ShadowLightDescriptor::CreateDescriptorSetLayout() {
     VkDescriptorSetLayoutBinding shadowDepthBinding{};
     normalBinding.binding = 3;
     normalBinding.descriptorCount = 1;
-    normalBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+    normalBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     normalBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 
@@ -57,7 +57,7 @@ void ShadowLightDescriptor::CreateDescriptorPool() {
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
     poolSizes[2].descriptorCount = 4;
 
-    poolSizes[3].type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+    poolSizes[3].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     poolSizes[3].descriptorCount = 4;
 
 
@@ -97,6 +97,22 @@ void ShadowLightDescriptor::CreateDescriptorSets() {
 
     // Write Initial Values
 
+    VkSamplerCreateInfo SamplerInfo{};
+    SamplerInfo.magFilter = VK_FILTER_LINEAR;
+    SamplerInfo.minFilter = VK_FILTER_LINEAR;
+    SamplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    SamplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    SamplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    SamplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    SamplerInfo.mipLodBias = 0.0f;
+    SamplerInfo.anisotropyEnable = VK_TRUE;
+    SamplerInfo.compareEnable = VK_FALSE;
+    SamplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+
+    vkCreateSampler(VulkanLogicalDevice::getLogicalDevice(), &SamplerInfo, nullptr, &depthImageSampler);
+
+
+
     std::array<VkDescriptorImageInfo, 4> images{};
     images[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     images[1].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -111,7 +127,7 @@ void ShadowLightDescriptor::CreateDescriptorSets() {
     images[0].sampler = VK_NULL_HANDLE;
     images[1].sampler = VK_NULL_HANDLE;
     images[2].sampler = VK_NULL_HANDLE;
-    images[3].sampler = VK_NULL_HANDLE;
+    images[3].sampler = depthImageSampler;
 
     // Set Values
 
@@ -151,7 +167,7 @@ void ShadowLightDescriptor::CreateDescriptorSets() {
         descriptorWrites[3].dstSet = mDescriptorSets[i];
         descriptorWrites[3].dstBinding = 2;
         descriptorWrites[3].dstArrayElement = 0;
-        descriptorWrites[3].descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+        descriptorWrites[3].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         descriptorWrites[3].descriptorCount = 1;
         descriptorWrites[3].pImageInfo = &images[3];
 
