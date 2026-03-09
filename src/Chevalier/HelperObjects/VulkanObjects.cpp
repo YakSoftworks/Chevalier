@@ -181,6 +181,14 @@ void VulkanPhysicalDevice::pickPhysicalDevice()
 
             MSAAResources::msaaSample = getMaxUsableSampleCount();    // Get the MSAA data from the device
 
+            VkPhysicalDeviceProperties physicalDeviceProperties{};
+            
+            vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+            
+            CHEV_MESSAGE_LOG("Using Device: " << physicalDeviceProperties.deviceName);
+
+
+
             break;
         }
     }
